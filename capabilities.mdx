@@ -80,6 +80,19 @@ A game can request a capture after a user action, but Cobalt's media permissions
 ## Distribution
 
 <CardGroup cols={2}>
+  <Card title="Game ownership keys" icon="key" href="/distribution/game-keys">
+    Link a verified game license to a player's Cobalt account without requiring Cobalt-hosted downloads.
+  </Card>
+  <Card title="Optional Cobalt DRM" icon="shield-check" href="/features/optional-drm">
+    Check account ownership online or through a bounded signed offline license.
+  </Card>
+</CardGroup>
+
+Production ownership and DRM require a verified `c_` project. Public `s_` projects receive isolated test entitlements only.
+
+## Game installation
+
+<CardGroup cols={2}>
   <Card title=".clgame packages" icon="package" href="/distribution/clgame">
     Install game data without requiring an official SDK integration.
   </Card>
@@ -88,7 +101,7 @@ A game can request a capture after a user action, but Cobalt's media permissions
   </Card>
 </CardGroup>
 
-Official `c_` games can later use signed releases, repair, update channels, and direct installation. Unofficial packages remain clearly labeled and cannot claim official status through local metadata.
+Official `c_` games can later use signed releases, repair, update channels, and direct installation. Public sandbox projects cannot distribute files. Unofficial `.clgame` packages remain a separate, clearly labeled installation path and cannot claim official status through local metadata.
 
 ## Capabilities intentionally excluded
 

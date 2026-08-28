@@ -5,6 +5,8 @@ description: "Package installable game data without requiring an official SDK in
 
 A `.clgame` file describes an installable game. It can contain the payload itself or reference HTTPS-hosted files. A game does not need an official Cobalt SDK integration to use this format.
 
+An independent `.clgame` package is not Cobalt distribution for an `s_` project. Sandbox projects cannot publish releases, updates, or install routes under their sandbox ID. Opening a local or remote community package uses a separate unverified-package flow.
+
 <Warning>
   This page proposes the `.clgame` format. Treat the schema as an example until the installer specification is finalized.
 </Warning>
@@ -85,7 +87,7 @@ Cobalt downloads every remote file into staging and verifies it before modifying
 
 ## Package identity
 
-An unofficial package receives an `l_` library identity unless Cobalt independently matches it to an official catalog game. Claiming a `c_` ID in `manifest.json` does not make the package official.
+An unofficial package receives an `l_` library identity unless Cobalt independently matches it to an official catalog game. Claiming an `s_` or `c_` ID in `manifest.json` does not bind the package to that project or make it official.
 
 Official packages are bound to trusted release metadata and require a publisher signature. Community signatures can identify repeat releases from the same author, but Cobalt must label them as unverified.
 

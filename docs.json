@@ -23,6 +23,7 @@
         "group": "Core concepts",
         "pages": [
           "concepts/game-identity",
+          "concepts/project-trust",
           "concepts/connection-model"
         ]
       },
@@ -58,8 +59,10 @@
         ]
       },
       {
-        "group": "Distribution",
+        "group": "Ownership and distribution",
         "pages": [
+          "distribution/game-keys",
+          "features/optional-drm",
           "distribution/clgame",
           "distribution/install-links"
         ]

@@ -1,0 +1,48 @@
+---
+title: "Project trust and verification"
+description: "Understand what sandbox registration proves and how a project becomes official."
+---
+
+Creating a Cobalt developer project proves control of that project. It does not prove ownership of the game, studio, trademark, or distribution rights.
+
+## Trust levels
+
+| Project | Public SDK use | Production keys and DRM | Cobalt distribution |
+| --- | --- | --- | --- |
+| Local `l_` entry | No registered integration | No | No |
+| Sandbox `s_` project | Yes, labeled unverified | Test entitlements only | No |
+| Official `c_` game | Yes, labeled official | Yes | Eligible after release review |
+
+Public sandbox access lets independent developers test Cobalt with real players. It does not let an integration present itself as an official release.
+
+## What Cobalt verifies
+
+Before promotion to `c_`, Cobalt verifies that the developer account represents the game or has authorization from its rights holder. Evidence can include:
+
+- A challenge file or DNS record on the game's official domain
+- A signed challenge from the same code-signing identity used by released builds
+- Control of a verified store publisher account or store listing
+- Confirmation from an established organization account
+- Legal or business documentation when automated evidence is insufficient
+
+Cobalt should automate domain, signature, and store checks where possible. A reviewer handles only ambiguous or high-risk claims.
+
+Uploading an executable is not proof. Public game files are available to players and can be copied by an impersonator.
+
+## Protected identities
+
+Cobalt can reserve well-known game and publisher names. An unverified project must use a clear modifier such as “community integration,” “mod,” or its own distinct title when the plain name would imply official ownership.
+
+Sandbox pages must show **Unverified integration** prominently. They cannot copy verified artwork, publisher attribution, or ownership language from the official catalog entry.
+
+## Account security
+
+Project access belongs to Cobalt developer accounts and organizations. Use roles so a studio can grant release access without sharing credentials. Require multi-factor authentication for ownership, key generation, DRM settings, and production releases.
+
+Record security-sensitive changes in an audit log. Transferring an official game to another organization changes its administrators, not its immutable `c_` ID.
+
+## Promotion
+
+After verification, Cobalt promotes the project from `s_` to `c_` and retains the sandbox ID as an alias. Production ownership keys, optional DRM, and direct distribution remain disabled until promotion.
+
+Verification is separate from release review. A verified developer can own an official project without asking Cobalt to host or distribute the game.

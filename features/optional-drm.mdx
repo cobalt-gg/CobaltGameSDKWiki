@@ -1,0 +1,93 @@
+---
+title: "Optional Cobalt DRM"
+description: "Validate a Cobalt game entitlement without exposing player or developer secrets."
+---
+
+Cobalt DRM is an optional use of account-linked game entitlements. SDK integrations do not require DRM, and enabling other Cobalt features does not automatically restrict game startup.
+
+Only a verified `c_` project can enable production DRM. Sandbox projects can test the same flow with isolated test entitlements.
+
+<Warning>
+  The DRM API on this page is a proposed contract. Client-side DRM can increase the effort required to copy a game, but it cannot make a game executable impossible to modify or bypass.
+</Warning>
+
+## Choose your policy
+
+Developers can choose one policy per release channel:
+
+| Policy | Behavior |
+| --- | --- |
+| Disabled | The game never checks Cobalt ownership |
+| Informational | The game reads ownership for UI or bonuses but never blocks play |
+| Required | A valid online entitlement or signed offline license is required for the protected build |
+
+Keep DRM disabled for builds sold through another store unless your agreement and player messaging clearly require Cobalt licensing.
+
+## Check ownership
+
+After initialization, request the entitlement for the current game:
+
+```cpp
+CobaltEntitlement entitlement{};
+entitlement.struct_size = sizeof(CobaltEntitlement);
+
+const CobaltResult result = Cobalt_GetGameEntitlement(&entitlement);
+
+if (result == COBALT_OK && entitlement.owned) {
+    StartGame();
+} else if (result == COBALT_NOT_OWNED) {
+    ShowOwnershipRequired();
+} else {
+    ShowLicenseRecovery(result);
+}
+```
+
+The result can distinguish production ownership from a sandbox test entitlement. A production build must reject test entitlements.
+
+The SDK never returns the redeemed key. It also never exposes a Cobalt password, account token, refresh token, developer secret, or signing private key.
+
+## Launch tickets and offline licenses
+
+For an online launch, Cobalt confirms the account entitlement and grants the game a short-lived, single-use launch ticket. The local SDK verifies that the ticket matches the game, player session, executable identity, and requested capability.
+
+For offline play, Cobalt can cache a signed license with a bounded lifetime. The license is scoped to the account, game, device, and release policy. The SDK verifies it with a Cobalt public key embedded in the SDK.
+
+The developer chooses an offline grace period within Cobalt's allowed range. Cobalt should refresh the license while online, tolerate normal clock changes, and provide a clear recovery flow instead of failing with a generic error.
+
+Do not design a protected game to require a live request on every startup. Temporary Cobalt outages should not lock out a player who has a valid offline license.
+
+## Server-authoritative proof
+
+Do not trust a boolean sent from a modified game client when ownership gates an online service. Request a short-lived, audience-bound ownership proof and validate it on your backend through the future Cobalt server integration.
+
+```cpp
+CobaltOwnershipProofRequest request{};
+request.struct_size = sizeof(CobaltOwnershipProofRequest);
+request.audience = "api.example-game.com";
+
+Cobalt_RequestOwnershipProof(&request, OnOwnershipProof, nullptr);
+```
+
+The proof should contain no reusable account credential. Bind it to your backend audience, the official game ID, the current player, and a short expiration time. Never accept a proof intended for another service.
+
+## Account and license changes
+
+Subscribe to account and entitlement changes while the game runs. Re-check at a safe boundary when the player switches accounts or a cached license expires. Do not terminate gameplay immediately in the middle of a save, match, or purchase.
+
+For a required policy, provide clear actions:
+
+- **Sign in to Cobalt** when no account is available
+- **Redeem a key** or **Buy game** when the account does not own it
+- **Reconnect to refresh license** when the offline license expired
+- **Switch account** when the player used a different account to redeem the key
+
+## Security boundaries
+
+- Treat the game ID as public metadata, not a DRM secret.
+- Never embed a developer portal credential or private signing key in the game.
+- Never send ownership keys through command-line arguments or deep links.
+- Rate-limit ownership proof requests and keep them short-lived.
+- Validate production and sandbox environments separately.
+- Make license failures diagnosable without logging private tokens or keys.
+
+See [Game ownership keys](/distribution/game-keys) for redemption and entitlement management.

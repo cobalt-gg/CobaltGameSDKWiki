@@ -1,0 +1,70 @@
+---
+title: "Game ownership keys"
+description: "Grant a game license to a Cobalt account by redeeming a one-time key."
+---
+
+Cobalt game keys let a player add a game license to their Cobalt account. The launcher can display the game as **Owned** even when the player installed it from another store or the developer does not use Cobalt distribution.
+
+<Warning>
+  Ownership keys and entitlement APIs on this page are proposed. Do not issue real products against this contract until Cobalt publishes the final key and revocation policies.
+</Warning>
+
+## Ownership means an entitlement
+
+When a player redeems a valid key, Cobalt creates a durable entitlement for that game on the signed-in account.
+
+The entitlement proves that the account has a license recognized by Cobalt. It does not transfer copyright, prove that a developer owns the game, or guarantee that Cobalt hosts the game files.
+
+Only a verified `c_` project can issue production keys. An `s_` project can create test entitlements for development, but they remain labeled as tests and never appear as production ownership.
+
+## Player redemption flow
+
+<Steps>
+  <Step title="Enter the key">
+    The player opens **Redeem a key** in Cobalt and enters a key such as `CBLT-7K4MP-9RX2Q-DVW8N-F6TZC-J3HQA`.
+  </Step>
+  <Step title="Review the product">
+    Cobalt shows the verified game, edition, issuing publisher, and any activation restrictions before redemption.
+  </Step>
+  <Step title="Confirm redemption">
+    Cobalt consumes the one-time key and attaches the entitlement to the current Cobalt account.
+  </Step>
+  <Step title="Use the entitlement">
+    Cobalt marks the game as owned. If the publisher also distributes through Cobalt, the player can install it. Otherwise, Cobalt can associate an existing installation without providing game files.
+  </Step>
+</Steps>
+
+Keys are account licenses, not device activation codes. A player signs in on another device instead of entering the same key again.
+
+## Issue keys
+
+A verified developer creates a key batch in the Cobalt Developer Portal. Each batch declares:
+
+- The official `c_` game ID
+- The base game, edition, downloadable content, or testing product it grants
+- The number of keys
+- An optional redemption deadline
+- A developer-visible campaign or partner label
+
+Cobalt should generate keys from cryptographically secure random data. The service stores only a keyed digest needed to validate an unredeemed key. The plaintext key is shown to the developer once and must never appear in SDK logs, analytics, crash reports, or game binaries.
+
+Distribute keys through a trusted store, crowdfunding campaign, physical card, or support workflow. Do not place a reusable key in an installer or public download.
+
+## Disable and revoke
+
+Disabling a batch prevents unused keys from being redeemed. It does not remove licenses that players already redeemed.
+
+Revoking an account entitlement is a separate, audited action intended for refunds, chargebacks, fraud, or legal requirements. Cobalt should show the affected player a reason and recovery path. A normal game update must never revoke ownership.
+
+## Keys without Cobalt distribution
+
+You can use ownership keys without uploading the game to Cobalt. In that configuration:
+
+- Cobalt records the account entitlement.
+- The SDK can read that entitlement if you enable optional DRM.
+- The player obtains and updates game files from your existing channel.
+- `cobalt://installgame/<id>` remains unavailable until you publish an approved Cobalt release.
+
+This separation lets developers use Cobalt accounts and licensing without making Cobalt their storefront or download host.
+
+Continue with [Optional Cobalt DRM](/features/optional-drm) to check an entitlement from a game.

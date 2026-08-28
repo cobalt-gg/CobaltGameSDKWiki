@@ -1,13 +1,14 @@
 ---
 title: "Game identity"
-description: "Understand generated local IDs and permanent official Cobalt game IDs."
+description: "Understand local, sandbox, and official Cobalt game IDs."
 ---
 
-Cobalt uses two game-ID namespaces.
+Cobalt uses three game-ID namespaces.
 
 | Prefix | Meaning | Example |
 | --- | --- | --- |
 | `l_` | Locally generated fallback identity | `l_370f78c23b0d...` |
+| `s_` | Public sandbox project from an unverified developer | `s_01k4x8h6p7n2...` |
 | `c_` | Official identity issued by Cobalt | `c_01k4x8h6p7n2...` |
 
 ## Local IDs
@@ -15,6 +16,22 @@ Cobalt uses two game-ID namespaces.
 Cobalt generates an `l_` ID when it discovers a game that has no verified catalog match. The current model hashes a canonical version of the game's name with SHA-256.
 
 Local IDs let Cobalt store playtime, artwork, collections, and other library state while offline. They are not developer credentials and are not suitable for achievements, cloud saves, or official distribution.
+
+## Sandbox IDs
+
+A developer receives an `s_` ID when they create a project in the Cobalt Developer Portal. Sandbox projects can serve real Cobalt players, so you can test public SDK features without waiting for ownership verification.
+
+Sandbox projects remain visibly unverified. They cannot:
+
+- Distribute, update, or repair game files through Cobalt
+- Issue production ownership keys
+- Enable production Cobalt DRM
+- Claim an official catalog entry, verified badge, or protected game name
+- Use official catalog artwork as if the integration came from the publisher
+
+Sandbox achievements, statistics, saves, and test entitlements use isolated namespaces. Cobalt can apply lower quotas, and the portal may reset that data while the SDK is under development.
+
+An `s_` ID proves which Cobalt developer account controls the integration. It does not prove that the developer created or owns the named game. See [Project trust and verification](/concepts/project-trust).
 
 ## Official IDs
 
@@ -26,6 +43,18 @@ A developer receives a `c_` ID after registering and verifying an SDK integratio
 - Store IDs remain separate provider identifiers.
 
 The prefix helps people and tools understand the namespace. Cobalt still verifies official status against its trusted catalog. A local file cannot become official by claiming a `c_` ID.
+
+## Promoting a sandbox project
+
+Cobalt keeps the opaque project body when a verified project becomes official:
+
+```text
+s_01k4x8h6p7n2abcde9m0qrstu → c_01k4x8h6p7n2abcde9m0qrstu
+```
+
+The old `s_` value remains a permanent alias so development builds do not stop connecting. New production builds should use the `c_` value. Once Cobalt issues the official ID, it never changes.
+
+Cobalt can migrate safe project data during promotion. Achievement and statistic definitions require review before sandbox progress becomes official.
 
 ## Upgrading a library entry
 
@@ -39,7 +68,7 @@ The launcher migrates collections, favorites, playtime, artwork, media associati
 
 ## Use your game ID
 
-Place the official ID in your SDK initialization configuration and build metadata:
+Place your sandbox or official ID in your SDK initialization configuration and build metadata:
 
 ```json
 {
@@ -49,4 +78,4 @@ Place the official ID in your SDK initialization configuration and build metadat
 }
 ```
 
-The game ID is public. Do not treat it as a secret or use it to authorize server-to-server operations.
+The game ID is public. Do not treat it as a secret or use it to authorize server-to-server operations. Game ownership uses account entitlements, not possession of a game ID.

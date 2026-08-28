@@ -25,6 +25,14 @@ The player may be signed out, offline, or hiding presence. Treat the player's pr
 
 Check for an unresolved conflict, a save write that never called `Cobalt_CloudEndWrite()`, an exceeded quota, or a network outage. Always provide an offline path to the main menu.
 
+## DRM reports `COBALT_NOT_OWNED`
+
+Confirm that the player signed in with the account that redeemed the key. Test entitlements from an `s_` project do not satisfy a production `c_` build. If the game was purchased elsewhere, confirm that the purchase included a Cobalt key or account-linking entitlement.
+
+## DRM reports `COBALT_LICENSE_EXPIRED`
+
+Ask the player to reconnect so Cobalt can refresh the signed offline license. Show the account, game, and recovery action, but never show or log the underlying ticket or proof. A valid unexpired offline license should continue working during a network outage.
+
 ## The packaged game cannot load the SDK
 
 Verify the native runtime for each target independently:

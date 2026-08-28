@@ -3,7 +3,7 @@ title: "Cobalt Game SDK"
 description: "Connect your game to Cobalt player services, social features, media, and distribution."
 ---
 
-The Cobalt Game SDK connects your game to the Cobalt Launcher. You can identify the signed-in player, publish rich presence, record achievements and statistics, synchronize saves, accept launch and invite context, enrich captures, and participate in Cobalt-managed distribution.
+The Cobalt Game SDK connects your game to the Cobalt Launcher. You can identify the signed-in player, publish rich presence, record achievements and statistics, synchronize saves, accept launch and invite context, enrich captures, grant account-linked ownership, optionally validate licenses, and participate in Cobalt-managed distribution.
 
 <Warning>
   This is an example wiki for an SDK that is still being designed. Names, packages, capabilities, and signatures shown here are a proposed contract, not a released API.
@@ -27,10 +27,10 @@ If Cobalt is unavailable, SDK calls return stable result codes and your game con
     See what games can build with the SDK.
   </Card>
   <Card title="Understand game IDs" icon="fingerprint" href="/concepts/game-identity">
-    Learn the difference between local and official Cobalt identities.
+    Learn the difference between local, sandbox, and official Cobalt identities.
   </Card>
-  <Card title="Distribute a game" icon="download" href="/distribution/clgame">
-    Describe an installable game with a `.clgame` package.
+  <Card title="Grant game ownership" icon="key" href="/distribution/game-keys">
+    Link a redeemed game key to a player's Cobalt account.
   </Card>
 </CardGroup>
 
@@ -46,7 +46,8 @@ If Cobalt is unavailable, SDK calls return stable result codes and your game con
 | Social | Parties, invitations, and join context with player consent |
 | Media | Capture context, screenshots, clips, and metadata |
 | Launch | Safe launch arguments, build channels, and deep-link payloads |
-| Distribution | Official installs, updates, and community `.clgame` packages |
+| Ownership | Account-linked game keys and optional entitlement validation |
+| Distribution | Official installs, updates, and independent `.clgame` packages |
 
 ## Choose an integration
 

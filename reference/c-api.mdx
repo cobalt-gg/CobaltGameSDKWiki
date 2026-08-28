@@ -28,6 +28,14 @@ The C API is the stable ABI beneath C++, Unity, Unreal Engine, and future langua
 | `Cobalt_GetLaunchContext` | Read safe Cobalt launch parameters |
 | `Cobalt_ConsumeLaunchAction` | Consume a one-time action |
 
+## Ownership and licensing
+
+| Function | Purpose |
+| --- | --- |
+| `Cobalt_GetGameEntitlement` | Read the current account's ownership state for this game |
+| `Cobalt_SetEntitlementChangedCallback` | Observe ownership, account, and offline-license changes |
+| `Cobalt_RequestOwnershipProof` | Request a short-lived proof for a game backend |
+
 ## Activity and lifecycle
 
 | Function | Purpose |

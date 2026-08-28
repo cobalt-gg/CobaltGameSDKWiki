@@ -11,6 +11,8 @@ Every synchronous SDK operation returns a stable `CobaltResult` value.
 | `COBALT_NOT_RUNNING` | The launcher is unavailable | Disable Cobalt UI and continue |
 | `COBALT_NOT_SIGNED_IN` | No player is signed in | Offer sign-in only after user action |
 | `COBALT_NOT_GRANTED` | The capability is not granted | Hide or disable that feature |
+| `COBALT_NOT_OWNED` | The current account has no valid production entitlement | Offer redemption, purchase, or account switching |
+| `COBALT_LICENSE_EXPIRED` | A required offline license must be refreshed | Ask the player to reconnect to Cobalt |
 | `COBALT_UNSUPPORTED` | The feature version is unavailable | Fall back gracefully |
 | `COBALT_OFFLINE` | A network operation is unavailable | Queue bounded state or retry later |
 | `COBALT_CONFLICT` | Cloud data requires a choice | Present conflict resolution |
@@ -31,4 +33,4 @@ if (result != COBALT_OK) {
 
 ## Retry safely
 
-Retry only transient results such as `COBALT_OFFLINE` or `COBALT_RATE_LIMITED`. Use exponential backoff and combine repeated state updates. Achievement unlocks and cloud checkpoints are designed to be idempotent.
+Retry only transient results such as `COBALT_OFFLINE` or `COBALT_RATE_LIMITED`. Use exponential backoff and combine repeated state updates. `COBALT_NOT_OWNED` is not transient; direct the player to redemption, purchase, or account switching. Achievement unlocks and cloud checkpoints are designed to be idempotent.

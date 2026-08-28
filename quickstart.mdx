@@ -16,7 +16,7 @@ Before you begin, you need:
 - A C or C++ game project
 - A Windows, Linux, or macOS development machine
 - A game registered in the future Cobalt Developer Portal
-- Your permanent official game ID, such as `c_01k4x8h6p7n2abcde9m0qrstu`
+- Your public sandbox ID, such as `s_01k4x8h6p7n2abcde9m0qrstu`, or verified official `c_` ID
 
 ## Add the SDK
 
@@ -56,6 +56,8 @@ bool InitializeCobalt()
 ```
 
 Never embed a Cobalt account token or developer secret. The game ID is public. The launcher authenticates the player and grants capabilities to the running game.
+
+Sandbox integrations work with real players but remain labeled as unverified. Production ownership keys, DRM, and Cobalt-hosted distribution require promotion to an official `c_` ID.
 
 ## Dispatch callbacks
 

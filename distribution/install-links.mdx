@@ -19,6 +19,8 @@ cobalt://installgame/c_01k4x8h6p7n2abcde9m0qrstu
 
 Cobalt resolves the ID through its trusted catalog and retrieves the appropriate signed release for the player's platform and selected channel.
 
+Only an approved `c_` release can use this route. Cobalt rejects `l_` and `s_` IDs because local and sandbox projects cannot distribute game files.
+
 ## Install from a URL
 
 Pass an encoded HTTPS URL in the query string:
@@ -50,3 +52,5 @@ For URL installs, Cobalt should:
 - Show the final source hostname to the player
 
 Opening a `.clgame` file directly uses the same inspection, confirmation, staging, verification, and installation pipeline.
+
+URL installation is the separate unverified-package flow. A package cannot gain sandbox or official project privileges by including an `s_` or `c_` ID in its metadata.
