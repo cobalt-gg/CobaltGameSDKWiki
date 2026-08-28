@@ -1,0 +1,52 @@
+---
+title: "Install links"
+description: "Open Cobalt installation flows for official IDs or remote .clgame packages."
+---
+
+Cobalt install links open the launcher and display an installation confirmation. They never install a game silently.
+
+<Warning>
+  The `cobalt://` routes on this page are a proposed protocol, not a currently registered application protocol.
+</Warning>
+
+## Install an official game
+
+Use the official immutable game ID:
+
+```text
+cobalt://installgame/c_01k4x8h6p7n2abcde9m0qrstu
+```
+
+Cobalt resolves the ID through its trusted catalog and retrieves the appropriate signed release for the player's platform and selected channel.
+
+## Install from a URL
+
+Pass an encoded HTTPS URL in the query string:
+
+```text
+cobalt://installgame?url=https%3A%2F%2Fdownloads.example.com%2Fsunken-city.clgame
+```
+
+You do not need a separate `installgame-url` route. The `url` query parameter distinguishes a remote package from an official game ID.
+
+```html
+<a href="cobalt://installgame?url=https%3A%2F%2Fdownloads.example.com%2Fsunken-city.clgame">
+  Install with Cobalt
+</a>
+```
+
+Encode the full URL with your platform's standard URL encoder. Do not concatenate untrusted values into a protocol link.
+
+## Validation rules
+
+For URL installs, Cobalt should:
+
+- Accept only HTTPS sources
+- Reject embedded credentials
+- Limit redirects and require every redirect to remain HTTPS
+- Limit manifest, archive, expanded, and individual-file sizes
+- Require explicit confirmation after inspection
+- Verify hashes and signatures before installation
+- Show the final source hostname to the player
+
+Opening a `.clgame` file directly uses the same inspection, confirmation, staging, verification, and installation pipeline.

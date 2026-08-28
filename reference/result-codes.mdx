@@ -1,0 +1,34 @@
+---
+title: "Result codes"
+description: "Handle SDK availability and errors without interrupting gameplay."
+---
+
+Every synchronous SDK operation returns a stable `CobaltResult` value.
+
+| Result | Meaning | Recommended behavior |
+| --- | --- | --- |
+| `COBALT_OK` | The operation succeeded | Continue |
+| `COBALT_NOT_RUNNING` | The launcher is unavailable | Disable Cobalt UI and continue |
+| `COBALT_NOT_SIGNED_IN` | No player is signed in | Offer sign-in only after user action |
+| `COBALT_NOT_GRANTED` | The capability is not granted | Hide or disable that feature |
+| `COBALT_UNSUPPORTED` | The feature version is unavailable | Fall back gracefully |
+| `COBALT_OFFLINE` | A network operation is unavailable | Queue bounded state or retry later |
+| `COBALT_CONFLICT` | Cloud data requires a choice | Present conflict resolution |
+| `COBALT_RATE_LIMITED` | Updates arrived too frequently | Back off and coalesce |
+| `COBALT_INVALID_ARGUMENT` | The game supplied invalid data | Fix the integration |
+| `COBALT_INTERNAL_ERROR` | Cobalt could not complete the operation | Log diagnostics and continue |
+
+## Convert a result to text
+
+```cpp
+const CobaltResult result = Cobalt_SetActivity(&activity);
+if (result != COBALT_OK) {
+    Log("Cobalt_SetActivity: %s", Cobalt_ResultName(result));
+}
+```
+
+`Cobalt_ResultName()` returns a stable symbolic name for logs. Do not show raw internal error text directly to players.
+
+## Retry safely
+
+Retry only transient results such as `COBALT_OFFLINE` or `COBALT_RATE_LIMITED`. Use exponential backoff and combine repeated state updates. Achievement unlocks and cloud checkpoints are designed to be idempotent.

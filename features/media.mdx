@@ -1,0 +1,51 @@
+---
+title: "Media and capture context"
+description: "Attach useful game context to Cobalt screenshots, clips, and recordings."
+---
+
+Cobalt can capture media without game integration. The SDK adds semantic context that process detection cannot know.
+
+## Set capture context
+
+```cpp
+CobaltMediaContext context{};
+context.struct_size = sizeof(CobaltMediaContext);
+context.mode = "ranked";
+context.map = "crystal_harbor";
+context.match_id = "match_9812";
+context.tags = "boss-fight,night";
+
+Cobalt_SetMediaContext(&context);
+```
+
+Cobalt can use this context to group the resulting media. Keep tags bounded and public-safe. Do not include private server credentials or chat content.
+
+## Mark a highlight
+
+```cpp
+CobaltMediaMarker marker{};
+marker.struct_size = sizeof(CobaltMediaMarker);
+marker.event_id = "boss_defeated";
+marker.display_label = "Harbor Guardian defeated";
+
+Cobalt_AddMediaMarker(&marker);
+```
+
+Markers can help a player find a moment inside a long recording or choose the best portion of a replay buffer.
+
+## Request a capture
+
+After a direct player action, a game may request:
+
+```cpp
+Cobalt_RequestScreenshot();
+Cobalt_RequestReplayClip();
+```
+
+The player's capture settings remain authoritative. Calls return `COBALT_NOT_GRANTED` when media capture is disabled or OS permission is unavailable.
+
+Do not repeatedly trigger captures automatically. Use a clear in-game setting for any automatic highlight feature and rate-limit requests.
+
+## Clear stale context
+
+Call `Cobalt_ClearMediaContext()` when leaving a match or loading a new save so future captures do not inherit incorrect metadata.

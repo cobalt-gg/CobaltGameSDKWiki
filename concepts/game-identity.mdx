@@ -1,0 +1,52 @@
+---
+title: "Game identity"
+description: "Understand generated local IDs and permanent official Cobalt game IDs."
+---
+
+Cobalt uses two game-ID namespaces.
+
+| Prefix | Meaning | Example |
+| --- | --- | --- |
+| `l_` | Locally generated fallback identity | `l_370f78c23b0d...` |
+| `c_` | Official identity issued by Cobalt | `c_01k4x8h6p7n2...` |
+
+## Local IDs
+
+Cobalt generates an `l_` ID when it discovers a game that has no verified catalog match. The current model hashes a canonical version of the game's name with SHA-256.
+
+Local IDs let Cobalt store playtime, artwork, collections, and other library state while offline. They are not developer credentials and are not suitable for achievements, cloud saves, or official distribution.
+
+## Official IDs
+
+A developer receives a `c_` ID after registering and verifying an SDK integration. An official ID is opaque and immutable.
+
+- Renaming the game does not change its ID.
+- Moving the game between publishers does not change its ID.
+- Delisted IDs are never reused.
+- Store IDs remain separate provider identifiers.
+
+The prefix helps people and tools understand the namespace. Cobalt still verifies official status against its trusted catalog. A local file cannot become official by claiming a `c_` ID.
+
+## Upgrading a library entry
+
+When Cobalt proves that a local entry matches an official game, it remaps the entry:
+
+```text
+l_370f78c23b0d... → c_01k4x8h6p7n2...
+```
+
+The launcher migrates collections, favorites, playtime, artwork, media associations, save data, and installation records. Provider identities such as a Steam AppID help Cobalt match the correct entry even when game names differ.
+
+## Use your game ID
+
+Place the official ID in your SDK initialization configuration and build metadata:
+
+```json
+{
+  "schemaVersion": 1,
+  "gameId": "c_01k4x8h6p7n2abcde9m0qrstu",
+  "minimumProtocolVersion": 1
+}
+```
+
+The game ID is public. Do not treat it as a secret or use it to authorize server-to-server operations.

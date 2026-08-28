@@ -1,0 +1,58 @@
+---
+title: "Cloud saves"
+description: "Synchronize declared save files and handle conflicts without blocking gameplay."
+---
+
+Cobalt cloud saves synchronize file sets declared for your official game. The launcher resolves platform-specific roots and never grants the game direct access to Cobalt account credentials.
+
+<Warning>
+  The exact cloud-save service contract is not finalized. This page demonstrates the intended game-facing behavior.
+</Warning>
+
+## Declare save data
+
+Configure save sets in the planned Developer Portal or signed game manifest:
+
+```json
+{
+  "saveSets": [
+    {
+      "id": "primary",
+      "paths": {
+        "windows": "{saved-games}/SunkenCity/*.sav",
+        "linux": "{xdg-data}/sunken-city/*.sav",
+        "macos": "{application-support}/SunkenCity/*.sav"
+      }
+    }
+  ]
+}
+```
+
+Cobalt validates safe roots, file counts, individual file sizes, and total quota. Save definitions cannot use absolute paths or parent-directory traversal.
+
+## Wait for startup synchronization
+
+```cpp
+Cobalt_CloudAwaitReady("primary", OnCloudReady, nullptr);
+```
+
+Show the player's save-selection UI only after the callback reports ready, offline, or conflict. Do not wait indefinitely before allowing the player to reach the main menu.
+
+## Protect active writes
+
+```cpp
+Cobalt_CloudBeginWrite("primary");
+WriteSaveAtomically();
+Cobalt_CloudEndWrite("primary");
+Cobalt_CloudCheckpoint("primary");
+```
+
+Write your own save file through a temporary file and atomic replacement. The begin/end calls tell Cobalt not to snapshot a partially written file.
+
+## Handle conflicts
+
+When both local and cloud data changed from the same base version, Cobalt preserves both copies and reports a conflict. Let the player choose based on timestamp, device, build, and playtime. Never silently overwrite either side.
+
+## Test failure cases
+
+Test interrupted uploads, a full quota, corrupted local files, an unavailable launcher, and a conflict between two machines. Your game should always remain able to start offline.

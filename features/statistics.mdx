@@ -1,0 +1,50 @@
+---
+title: "Statistics"
+description: "Record totals, gauges, counters, and personal bests."
+---
+
+Statistics power player history, achievement progress, and optional community comparisons.
+
+<Warning>
+  Statistics are a planned capability and require registered definitions for each official game.
+</Warning>
+
+## Statistic types
+
+| Type | Example | Update behavior |
+| --- | --- | --- |
+| Counter | Enemies defeated | Increment only |
+| Total | Distance travelled | Add a positive delta |
+| Gauge | Current campaign level | Replace current value |
+| Best low | Fastest completion time | Keep the lowest value |
+| Best high | Highest score | Keep the highest value |
+
+## Add to a statistic
+
+```cpp
+Cobalt_StatAddInt64("enemies_defeated", 1);
+Cobalt_StatAddDouble("distance_metres", travelled);
+```
+
+## Submit a personal best
+
+```cpp
+Cobalt_StatSubmitBestDouble(
+    "speedrun_seconds",
+    run_duration_seconds
+);
+```
+
+The definition stored by Cobalt determines whether lower or higher values are better. The game cannot change that rule at runtime.
+
+## Flush a checkpoint
+
+```cpp
+Cobalt_StatsCheckpoint();
+```
+
+Checkpoint at meaningful boundaries such as the end of a match or a completed save. Do not flush every counter change.
+
+## Protect competitive data
+
+Client statistics are player-facing and can be modified by a compromised client. Use a future authenticated game-server integration for ranked leaderboards, tournament results, or valuable rewards.

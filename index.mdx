@@ -1,20 +1,59 @@
 ---
-title: "Introduction"
-description: "Welcome to your project"
+title: "Cobalt Game SDK"
+description: "Connect your game to Cobalt player services, social features, media, and distribution."
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+The Cobalt Game SDK connects your game to the Cobalt Launcher. You can identify the signed-in player, publish rich presence, record achievements and statistics, synchronize saves, accept launch and invite context, enrich captures, and participate in Cobalt-managed distribution.
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+<Warning>
+  This is an example wiki for an SDK that is still being designed. Names, packages, capabilities, and signatures shown here are a proposed contract, not a released API.
+</Warning>
 
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>
+## How it works
+
+Your game talks to the installed Cobalt Launcher through a local, authenticated connection. The launcher owns the player session and communicates with Cobalt services. Account tokens never enter your game process.
+
+```text
+Your game → Cobalt Game SDK → Cobalt Launcher → Cobalt services
+```
+
+If Cobalt is unavailable, SDK calls return stable result codes and your game continues normally. Do not make the SDK a requirement for starting or playing your game.
+
+<CardGroup cols={2}>
+  <Card title="Build your first connection" icon="rocket" href="/quickstart">
+    Initialize the native SDK and publish your first activity.
+  </Card>
+  <Card title="Explore every capability" icon="grid-2" href="/capabilities">
+    See what games can build with the SDK.
+  </Card>
+  <Card title="Understand game IDs" icon="fingerprint" href="/concepts/game-identity">
+    Learn the difference between local and official Cobalt identities.
+  </Card>
+  <Card title="Distribute a game" icon="download" href="/distribution/clgame">
+    Describe an installable game with a `.clgame` package.
+  </Card>
+</CardGroup>
+
+## Planned capability groups
+
+| Group | What it enables |
+| --- | --- |
+| Core | Connection state, feature negotiation, callbacks, diagnostics |
+| Player | Public profile and account-change events |
+| Activity | Accurate sessions, playtime, presence, and pause state |
+| Progression | Achievements, counters, statistics, and personal bests |
+| Storage | Declared cloud-save sets, checkpoints, and conflict handling |
+| Social | Parties, invitations, and join context with player consent |
+| Media | Capture context, screenshots, clips, and metadata |
+| Launch | Safe launch arguments, build channels, and deep-link payloads |
+| Distribution | Official installs, updates, and community `.clgame` packages |
+
+## Choose an integration
+
+The native C ABI is the compatibility layer for every engine integration.
+
+- Use the [C and C++ quickstart](/quickstart) for custom engines.
+- Use the [Unity integration](/integrations/unity) for C# projects.
+- Use the [Unreal Engine integration](/integrations/unreal) for Unreal projects.
+
+The initial platform targets are Windows x86-64, Linux x86-64, and macOS universal binaries. Steam Deck and Proton support use an authenticated local fallback when a Windows game cannot reach the launcher's native Unix socket.

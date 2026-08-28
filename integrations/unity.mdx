@@ -1,0 +1,73 @@
+---
+title: "Unity"
+description: "Add the proposed Cobalt Unity package and dispatch SDK callbacks."
+---
+
+The Unity package wraps the native Cobalt Game SDK through C# P/Invoke and includes native binaries for supported desktop targets.
+
+<Warning>
+  The package URL and C# API shown here are placeholders for the planned Unity integration.
+</Warning>
+
+## Install the package
+
+In Unity, open **Window → Package Manager**, select **Add package from git URL**, and enter the future package URL:
+
+```text
+https://github.com/cobalt-gg/cobalt-game-sdk-unity.git?path=/Packages/com.cobalt.gamesdk
+```
+
+## Initialize once
+
+Create a persistent bootstrap component:
+
+```csharp
+using Cobalt.GameSDK;
+using UnityEngine;
+
+public sealed class CobaltBootstrap : MonoBehaviour
+{
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+
+        var result = CobaltClient.Initialize(
+            "c_01k4x8h6p7n2abcde9m0qrstu"
+        );
+
+        if (result != CobaltResult.Ok)
+            Debug.Log($"Cobalt unavailable: {result}");
+    }
+
+    private void Update()
+    {
+        CobaltClient.RunCallbacks();
+    }
+
+    private void OnApplicationQuit()
+    {
+        CobaltClient.Shutdown();
+    }
+}
+```
+
+## Publish presence
+
+```csharp
+CobaltClient.SetActivity(new CobaltActivity
+{
+    Details = "Exploring the Sunken City",
+    State = "Story mode",
+    StartedAt = System.DateTimeOffset.UtcNow
+});
+```
+
+## Unlock an achievement
+
+```csharp
+CobaltClient.UnlockAchievement("finish_tutorial");
+```
+
+## Build settings
+
+Enable only the architectures shipped by the package. Verify that the native library is beside the Windows/Linux executable or embedded in the macOS application bundle. Test a development build outside the Unity editor because editor process identity differs from the final game.

@@ -1,0 +1,59 @@
+---
+title: "Launch context"
+description: "Receive safe mode, lobby, campaign, and invitation parameters from Cobalt."
+---
+
+Launch context lets Cobalt start your game at a meaningful destination without exposing arbitrary command execution.
+
+## Read the context
+
+```cpp
+CobaltLaunchContext context{};
+context.struct_size = sizeof(CobaltLaunchContext);
+
+if (Cobalt_GetLaunchContext(&context) == COBALT_OK) {
+    if (StringsEqual(context.action, "join_party")) {
+        QueuePartyJoin(context.payload);
+    }
+}
+```
+
+A context can include:
+
+- A registered action such as `continue_campaign`, `join_party`, or `open_replay`
+- An opaque payload for that action
+- The source, such as library, friend invitation, or website
+- A release channel or expected build ID
+- A short expiration time
+
+## Register actions
+
+Declare supported actions in the developer configuration. Cobalt rejects unknown actions before launching the game.
+
+```json
+{
+  "launchActions": [
+    {
+      "id": "continue_campaign",
+      "payloadMaximumBytes": 512
+    },
+    {
+      "id": "join_party",
+      "payloadMaximumBytes": 2048,
+      "expiresAfterSeconds": 120
+    }
+  ]
+}
+```
+
+## Validate again in your game
+
+Treat every payload as untrusted input even when Cobalt delivered it. Enforce length limits, parse strict schemas, reject expired join data, and confirm the player is allowed to perform the action.
+
+## Consume once
+
+```cpp
+Cobalt_ConsumeLaunchAction(context.action_id);
+```
+
+Consuming a one-time action prevents it from running again after an ordinary restart. Your game decides when the action has been accepted successfully.

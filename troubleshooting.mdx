@@ -1,0 +1,40 @@
+---
+title: "Troubleshooting"
+description: "Diagnose initialization, capability, packaging, and callback problems."
+---
+
+## Initialization returns `COBALT_NOT_RUNNING`
+
+Confirm that the Cobalt Launcher is running under the same OS user as the game. The SDK should not require administrator privileges. On Steam Deck or Proton, confirm that the launch ticket reached the Windows game process.
+
+Your game must continue without Cobalt. Do not loop on initialization every frame.
+
+## Initialization returns `COBALT_NOT_GRANTED`
+
+Confirm that the game's official ID matches its developer registration. A copied `c_` ID does not grant another executable access. If the build was launched outside Cobalt, approve its first connection in the launcher.
+
+## Callbacks never run
+
+Call `Cobalt_RunCallbacks()` regularly from one thread. Unity integrations normally call it from `Update()`. Unreal integrations normally call it from a game-instance subsystem or module ticker.
+
+## Presence does not appear publicly
+
+The player may be signed out, offline, or hiding presence. Treat the player's privacy setting as authoritative even if `Cobalt_SetActivity()` accepted the local update.
+
+## Cloud saves remain pending
+
+Check for an unresolved conflict, a save write that never called `Cobalt_CloudEndWrite()`, an exceeded quota, or a network outage. Always provide an offline path to the main menu.
+
+## The packaged game cannot load the SDK
+
+Verify the native runtime for each target independently:
+
+- Ship `cobalt_sdk.dll` beside the Windows executable.
+- Stage `libcobalt_sdk.so` and configure an appropriate Linux runtime search path.
+- Embed and sign the macOS framework with the application.
+
+A working editor build does not prove that a packaged build contains the native library.
+
+## Collect diagnostics
+
+Log the SDK version, protocol version, game ID, result-code names, and capability list. Never log launch tickets, account tokens, private save contents, join credentials, or personally identifying information.

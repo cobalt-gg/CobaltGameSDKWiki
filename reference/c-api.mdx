@@ -1,0 +1,76 @@
+---
+title: "C API overview"
+description: "Review the proposed native API groups and lifecycle."
+---
+
+The C API is the stable ABI beneath C++, Unity, Unreal Engine, and future language bindings.
+
+<Warning>
+  This is a provisional reference. It documents the example contract used throughout this wiki.
+</Warning>
+
+## Core lifecycle
+
+| Function | Purpose |
+| --- | --- |
+| `Cobalt_Initialize` | Connect and negotiate a scoped game session |
+| `Cobalt_GetStatus` | Read launcher, network, and account state |
+| `Cobalt_HasCapability` | Check whether a feature is granted |
+| `Cobalt_RunCallbacks` | Dispatch queued callbacks on the calling thread |
+| `Cobalt_Shutdown` | Release transport and callback resources |
+
+## Player and launch
+
+| Function | Purpose |
+| --- | --- |
+| `Cobalt_GetPlayer` | Read the player's public profile |
+| `Cobalt_SetPlayerChangedCallback` | Observe sign-in and account changes |
+| `Cobalt_GetLaunchContext` | Read safe Cobalt launch parameters |
+| `Cobalt_ConsumeLaunchAction` | Consume a one-time action |
+
+## Activity and lifecycle
+
+| Function | Purpose |
+| --- | --- |
+| `Cobalt_SetLifecycleState` | Report loading, playing, paused, or idle |
+| `Cobalt_UpdateSession` | Add stable mode, map, and build context |
+| `Cobalt_SetActivity` | Publish public rich presence |
+| `Cobalt_ClearActivity` | Remove the current activity |
+
+## Progression
+
+| Function | Purpose |
+| --- | --- |
+| `Cobalt_UnlockAchievement` | Idempotently unlock a registered achievement |
+| `Cobalt_SetAchievementProgress` | Report current and maximum progress |
+| `Cobalt_StatAddInt64` | Add to an integer counter or total |
+| `Cobalt_StatAddDouble` | Add to a floating-point total |
+| `Cobalt_StatSubmitBestDouble` | Submit a personal-best candidate |
+| `Cobalt_StatsCheckpoint` | Flush a bounded progression checkpoint |
+
+## Cloud saves
+
+| Function | Purpose |
+| --- | --- |
+| `Cobalt_CloudAwaitReady` | Observe startup sync completion or conflict |
+| `Cobalt_CloudBeginWrite` | Pause snapshots for an active save write |
+| `Cobalt_CloudEndWrite` | Resume snapshots after the write |
+| `Cobalt_CloudCheckpoint` | Request sync of a declared save set |
+
+## Social and media
+
+| Function | Purpose |
+| --- | --- |
+| `Cobalt_SetParty` | Publish party capacity and joinability |
+| `Cobalt_SetJoinPayloadCallback` | Create a short-lived join payload |
+| `Cobalt_SetInvitationAcceptedCallback` | Observe accepted invitations |
+| `Cobalt_SetMediaContext` | Attach match and level context to captures |
+| `Cobalt_AddMediaMarker` | Mark a noteworthy event |
+| `Cobalt_RequestScreenshot` | Request a player-permitted screenshot |
+| `Cobalt_RequestReplayClip` | Request a player-permitted replay clip |
+
+## ABI rules
+
+Public structs begin with `struct_size` so newer SDKs can add trailing fields. Strings passed into the SDK are UTF-8. Returned views remain valid only for the duration documented by the final API. Never free SDK-owned memory with the game's allocator.
+
+All asynchronous callbacks run from `Cobalt_RunCallbacks()`. Do not call that function concurrently from multiple threads.

@@ -1,0 +1,61 @@
+---
+title: "Parties and invitations"
+description: "Advertise party capacity and receive player-approved join requests."
+---
+
+The social capability connects a game's existing multiplayer system to Cobalt invitations. Cobalt does not host game networking or matchmaking.
+
+<Warning>
+  Parties and invitations are a later planned capability. The player must explicitly allow social and presence features.
+</Warning>
+
+## Publish party state
+
+```cpp
+CobaltParty party{};
+party.struct_size = sizeof(CobaltParty);
+party.party_id = "party_7d4a";
+party.current_size = 3;
+party.maximum_size = 4;
+party.joinable = true;
+
+Cobalt_SetParty(&party);
+```
+
+The party ID may be public. Keep the actual connection credential in an opaque, short-lived join payload.
+
+## Provide a join payload
+
+```cpp
+void OnJoinPayloadRequested(
+    const CobaltJoinRequest* request,
+    CobaltJoinReply* reply,
+    void* user_data)
+{
+    reply->payload = CreateShortLivedJoinToken(request->friend_id);
+    reply->expires_at_unix_seconds = GetUnixTime() + 120;
+}
+
+Cobalt_SetJoinPayloadCallback(OnJoinPayloadRequested, nullptr);
+```
+
+Only create a token after Cobalt reports a valid, player-approved request. Bind it to the expected friend or party when your multiplayer service supports that.
+
+## Receive an invitation
+
+```cpp
+void OnInvitationAccepted(
+    const CobaltInvitation* invitation,
+    void* user_data)
+{
+    QueueJoin(invitation->payload);
+}
+
+Cobalt_SetInvitationAcceptedCallback(OnInvitationAccepted, nullptr);
+```
+
+Validate the payload with your multiplayer service. Cobalt transports the request but does not guarantee that a server slot still exists.
+
+## Clear party state
+
+Call `Cobalt_ClearParty()` when the lobby closes, the party becomes private, or the player leaves multiplayer.

@@ -1,0 +1,55 @@
+---
+title: "Achievements"
+description: "Unlock idempotent achievements and report bounded progress."
+---
+
+Define achievements in the planned Cobalt Developer Portal before referencing them in your build. Use stable machine IDs such as `finish_tutorial`; do not use the displayed title as the identifier.
+
+<Warning>
+  Achievement storage and portal behavior require corresponding Cobalt service support.
+</Warning>
+
+## Unlock an achievement
+
+```cpp
+const CobaltResult result =
+    Cobalt_UnlockAchievement("finish_tutorial");
+
+if (result != COBALT_OK && result != COBALT_OFFLINE) {
+    Log("Achievement update failed: %s", Cobalt_ResultName(result));
+}
+```
+
+Unlocking an already unlocked achievement is safe. Cobalt treats the request as idempotent and preserves the original unlock time.
+
+## Report progress
+
+```cpp
+Cobalt_SetAchievementProgress(
+    "find_all_relics",
+    collected_relics,
+    total_relics
+);
+```
+
+Cobalt clamps invalid progress and rejects an achievement ID that is not registered for the game. Progress must not decrease unless the definition explicitly allows resets.
+
+## Show player progress
+
+```cpp
+Cobalt_GetAchievement(
+    "find_all_relics",
+    OnAchievementLoaded,
+    nullptr
+);
+```
+
+Use the returned localized title, description, artwork URL, progress, and unlock state. Do not duplicate portal-authored text in every game build unless you need an offline fallback.
+
+## Offline behavior
+
+The launcher can queue bounded achievement updates while offline. Your game should still persist its own authoritative progression and may safely report the same state again after reconnecting.
+
+## Competitive achievements
+
+Client-reported achievements are not tamper-proof. Do not use them as proof for valuable rewards or competitive rankings. A future server-authoritative flow should validate those events from your game service.

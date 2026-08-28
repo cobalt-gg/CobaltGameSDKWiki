@@ -1,0 +1,54 @@
+---
+title: "Rich presence"
+description: "Show meaningful activity in Cobalt without flooding the local connection."
+---
+
+Rich presence tells friends what the player is doing. Update it when the activity changes, not every frame.
+
+## Set an activity
+
+```cpp
+CobaltActivity activity{};
+activity.struct_size = sizeof(CobaltActivity);
+activity.details = "Ranked match";
+activity.state = "Crystal Harbor";
+activity.started_at_unix_seconds = match.started_at;
+activity.party_current = 3;
+activity.party_maximum = 4;
+
+Cobalt_SetActivity(&activity);
+```
+
+Keep activity text concise and suitable for public display. Never include chat messages, access tokens, IP addresses, or personally identifying information.
+
+## Recommended update points
+
+Update presence when the player:
+
+- Enters the main menu
+- Starts or finishes a match
+- Changes a level, mode, or party
+- Pauses for an extended period
+- Returns to an idle state
+
+Do not update timestamps or party state continuously. Cobalt calculates elapsed time from the starting timestamp.
+
+## Add join availability
+
+When your registered game supports parties, presence can advertise a joinable party without exposing its private join secret:
+
+```cpp
+activity.party_id = "party_7d4a";
+activity.joinable = true;
+Cobalt_SetActivity(&activity);
+```
+
+Cobalt requests the actual join payload only after a permitted friend accepts an invitation or join action.
+
+## Clear an activity
+
+```cpp
+Cobalt_ClearActivity();
+```
+
+The player's Cobalt presence setting remains authoritative. The SDK may accept a local update even when the launcher suppresses public presence for privacy reasons.

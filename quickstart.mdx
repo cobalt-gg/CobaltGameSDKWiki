@@ -1,47 +1,128 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "C and C++ quickstart"
+description: "Connect a native game to Cobalt and publish your first activity."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+This guide initializes the native SDK, handles an unavailable launcher, dispatches callbacks, and publishes a basic activity.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+<Warning>
+  The package names and function signatures on this page are examples for the proposed SDK.
+</Warning>
 
 ## Prerequisites
 
-Before you begin, you must have:
+Before you begin, you need:
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+- A C or C++ game project
+- A Windows, Linux, or macOS development machine
+- A game registered in the future Cobalt Developer Portal
+- Your permanent official game ID, such as `c_01k4x8h6p7n2abcde9m0qrstu`
 
-## Get started
+## Add the SDK
+
+<Tabs>
+  <Tab title="Windows">
+    Add `include/` to your compiler's include paths. Link `cobalt_sdk.lib`, then ship `cobalt_sdk.dll` beside your executable.
+  </Tab>
+  <Tab title="Linux">
+    Add `include/` to your compiler's include paths. Link `libcobalt_sdk.so` and package it with your game.
+  </Tab>
+  <Tab title="macOS">
+    Link `CobaltGameSDK.xcframework` and embed it in your application bundle.
+  </Tab>
+</Tabs>
+
+## Initialize Cobalt
+
+```cpp
+#include <cobalt/cobalt.h>
+
+bool InitializeCobalt()
+{
+    CobaltConfig config{};
+    config.struct_size = sizeof(CobaltConfig);
+    config.game_id = "c_01k4x8h6p7n2abcde9m0qrstu";
+
+    const CobaltResult result = Cobalt_Initialize(&config);
+
+    if (result == COBALT_OK) {
+        return true;
+    }
+
+    // Cobalt support is optional. Keep the game playable.
+    Log("Cobalt is unavailable: %s", Cobalt_ResultName(result));
+    return false;
+}
+```
+
+Never embed a Cobalt account token or developer secret. The game ID is public. The launcher authenticates the player and grants capabilities to the running game.
+
+## Dispatch callbacks
+
+Call `Cobalt_RunCallbacks()` from your main loop. The SDK performs transport work in the background but dispatches game callbacks only when you request them.
+
+```cpp
+void GameTick()
+{
+    Cobalt_RunCallbacks();
+    UpdateGame();
+}
+```
+
+## Read the player
+
+```cpp
+CobaltPlayer player{};
+player.struct_size = sizeof(CobaltPlayer);
+
+if (Cobalt_GetPlayer(&player) == COBALT_OK) {
+    Log("Signed in to Cobalt as %s", player.display_name);
+}
+```
+
+The public profile never includes an email address, account token, or refresh token.
+
+## Publish an activity
+
+```cpp
+CobaltActivity activity{};
+activity.struct_size = sizeof(CobaltActivity);
+activity.details = "Exploring the Sunken City";
+activity.state = "Story mode";
+activity.started_at_unix_seconds = GetSessionStartTime();
+
+Cobalt_SetActivity(&activity);
+```
+
+See [Rich presence](/features/presence) for parties, clearing activity, and update-rate guidance.
+
+## Shut down cleanly
+
+```cpp
+void ShutdownGame()
+{
+    Cobalt_ClearActivity();
+    Cobalt_Shutdown();
+}
+```
+
+Call shutdown before unloading the SDK library. Cobalt also closes abandoned sessions when the game process exits.
+
+## Verify the integration
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
-
-    ```bash
-    npm install your-package
-    ```
+  <Step title="Open Cobalt developer mode">
+    Start Cobalt and enable the planned **Game SDK diagnostics** panel.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
-
-    ```bash
-    your-cli init
-    ```
+  <Step title="Run your game">
+    Launch your development build. Approve its first local connection if Cobalt asks.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
-
-    ```bash
-    your-cli start
-    ```
+  <Step title="Inspect the session">
+    Confirm the game ID, SDK version, protocol version, granted capabilities, and current activity.
+  </Step>
+  <Step title="Test without Cobalt">
+    Exit Cobalt and launch the game again. The game should remain fully playable.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
-
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+Continue with [What you can build](/capabilities) to choose the next feature.

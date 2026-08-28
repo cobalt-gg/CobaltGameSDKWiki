@@ -1,0 +1,53 @@
+---
+title: "Lifecycle and playtime"
+description: "Report accurate loading, playing, paused, and stopped states."
+---
+
+An active SDK connection lets Cobalt measure sessions more accurately than process-name matching.
+
+## Set the lifecycle state
+
+```cpp
+Cobalt_SetLifecycleState(COBALT_LIFECYCLE_LOADING);
+
+// The level is ready and the player has control.
+Cobalt_SetLifecycleState(COBALT_LIFECYCLE_PLAYING);
+
+// A pause menu stops active playtime.
+Cobalt_SetLifecycleState(COBALT_LIFECYCLE_PAUSED);
+```
+
+Recommended states:
+
+| State | Meaning |
+| --- | --- |
+| `STARTING` | The process initialized but gameplay is not ready |
+| `LOADING` | The player is waiting for a load or transition |
+| `PLAYING` | Active player-controlled gameplay |
+| `PAUSED` | Gameplay is intentionally paused |
+| `IDLE` | The game is open without an active session |
+| `STOPPING` | The game is shutting down cleanly |
+
+Cobalt still treats the process lifetime as authoritative for whether the game is running. Lifecycle state refines playtime and presence; it cannot keep a session alive after the process exits.
+
+## Name a session
+
+```cpp
+CobaltSessionInfo session{};
+session.struct_size = sizeof(CobaltSessionInfo);
+session.mode = "ranked";
+session.map = "crystal_harbor";
+session.build_id = GetBuildId();
+
+Cobalt_UpdateSession(&session);
+```
+
+Use stable internal identifiers where possible. Cobalt may use the information for diagnostics, media grouping, and player-facing history.
+
+## Avoid inflation
+
+Do not report `PLAYING` while waiting at the title screen, downloading content, or suspended in the background. Cobalt can reject impossible timestamps or excessively frequent state changes.
+
+## Handle a crash
+
+No special crash callback is required. The launcher closes the session when the process disappears and records an unclean ending. Call `Cobalt_Shutdown()` during an ordinary exit so pending bounded updates can flush.

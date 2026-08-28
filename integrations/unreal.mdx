@@ -1,0 +1,71 @@
+---
+title: "Unreal Engine"
+description: "Initialize the proposed Cobalt Unreal plugin from a game-instance subsystem."
+---
+
+The Unreal integration wraps the native SDK in an engine module and exposes Blueprint-safe operations for common features.
+
+<Warning>
+  Module names and Unreal APIs shown here are placeholders for the planned integration.
+</Warning>
+
+## Add the plugin
+
+Copy the future `CobaltGameSDK` plugin into your project's `Plugins/` directory and enable it in **Edit → Plugins**.
+
+Add the module dependency:
+
+```csharp
+PublicDependencyModuleNames.AddRange(new[]
+{
+    "Core",
+    "CoreUObject",
+    "Engine",
+    "CobaltGameSDK"
+});
+```
+
+## Initialize the SDK
+
+A game-instance subsystem is a suitable owner because it survives level changes.
+
+```cpp
+void UCobaltSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+    Super::Initialize(Collection);
+
+    const ECobaltResult Result = FCobaltSDK::Get().Initialize(
+        TEXT("c_01k4x8h6p7n2abcde9m0qrstu")
+    );
+
+    UE_LOG(LogTemp, Log, TEXT("Cobalt initialization: %s"),
+        *LexToString(Result));
+}
+
+void UCobaltSubsystem::Deinitialize()
+{
+    FCobaltSDK::Get().Shutdown();
+    Super::Deinitialize();
+}
+```
+
+## Dispatch callbacks
+
+Tick `FCobaltSDK::Get().RunCallbacks()` from the subsystem or module ticker. Keep callbacks on the game thread before changing Unreal objects.
+
+## Use Blueprints
+
+The planned plugin can expose Blueprint nodes for:
+
+- Set Cobalt activity
+- Unlock Cobalt achievement
+- Check Cobalt capability
+- Request Cobalt screenshot
+- Observe player changed
+- Observe invitation accepted
+
+Keep low-level transport, pointers, and memory ownership inside the native module.
+
+## Package all platforms
+
+The plugin should select the correct library under `Source/ThirdParty/CobaltGameSDK/`. Verify Windows, Linux, and macOS staging rules separately. A successful Windows package does not prove that Linux or macOS native libraries were included.

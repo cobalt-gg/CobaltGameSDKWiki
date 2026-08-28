@@ -1,0 +1,59 @@
+---
+title: "Player identity"
+description: "Read the signed-in player's public Cobalt identity and react to account changes."
+---
+
+The player API exposes only the public profile needed for an in-game Cobalt experience.
+
+<Warning>
+  Player APIs shown here are part of the proposed SDK contract.
+</Warning>
+
+## Read the current player
+
+```cpp
+CobaltPlayer player{};
+player.struct_size = sizeof(CobaltPlayer);
+
+const CobaltResult result = Cobalt_GetPlayer(&player);
+if (result == COBALT_OK) {
+    SetCobaltLabel(player.display_name);
+    LoadAvatar(player.avatar_url);
+}
+```
+
+A player record can contain:
+
+| Field | Purpose |
+| --- | --- |
+| `id` | Stable public Cobalt user ID |
+| `username` | Unique public username |
+| `display_name` | Player-selected display name |
+| `avatar_url` | Validated Cobalt-hosted HTTPS avatar |
+| `signed_in` | Whether a public profile is available |
+
+The SDK never exposes an email address, password, ID token, refresh token, private key, or private social profile.
+
+## Observe account changes
+
+```cpp
+void OnCobaltPlayerChanged(
+    const CobaltPlayer* player,
+    void* user_data)
+{
+    if (player == nullptr) {
+        HideCobaltProfile();
+        return;
+    }
+
+    ShowCobaltProfile(player->display_name, player->avatar_url);
+}
+
+Cobalt_SetPlayerChangedCallback(OnCobaltPlayerChanged, nullptr);
+```
+
+Account changes can happen while the game runs. Clear cached player-specific UI and pending requests when the player signs out.
+
+## Link to your own account
+
+A Cobalt player ID is not automatically an account in your game. If you support account linking, ask the player explicitly and complete the proof through a future server-authoritative flow. Do not trust a user ID sent directly by the game client to your backend.

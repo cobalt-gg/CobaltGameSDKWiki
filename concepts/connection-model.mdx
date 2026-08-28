@@ -1,0 +1,61 @@
+---
+title: "Connection model"
+description: "Learn how games communicate safely with the installed Cobalt Launcher."
+---
+
+The SDK does not call Cobalt's private web services directly. It connects to the Cobalt Launcher, which brokers account and game services.
+
+```text
+Game process
+  └─ Cobalt Game SDK
+       └─ authenticated local transport
+            └─ Cobalt Launcher
+                 └─ Cobalt services
+```
+
+## Local transports
+
+Cobalt chooses a transport for the current platform:
+
+- Windows uses a per-user named pipe.
+- Native Linux and macOS games use a Unix-domain socket.
+- Windows games running through Proton use a loopback fallback authenticated by a short-lived launch ticket.
+
+The launcher limits message size and rate, validates every request, and scopes the session to the registered game and process.
+
+## Launch tickets
+
+When Cobalt launches a game, it creates a random, short-lived, single-use ticket. The SDK presents that ticket during its handshake. A game started outside Cobalt can request a one-time player approval instead.
+
+A launch ticket is not an account token. It grants only the capabilities registered for that game and expires quickly.
+
+## Capability negotiation
+
+Initialization returns the features available in the current session. Availability depends on:
+
+- The launcher's supported protocol version
+- The SDK version
+- Capabilities registered for the game
+- Player sign-in and privacy settings
+- Network availability
+
+Check feature availability before presenting Cobalt-specific UI.
+
+```cpp
+if (Cobalt_HasCapability(COBALT_CAPABILITY_ACHIEVEMENTS)) {
+    ShowCobaltAchievementProgress();
+}
+```
+
+## Disconnections
+
+The launcher may update, exit, or lose its network connection while your game runs. The SDK reconnects locally when possible and reports connection changes through callbacks.
+
+Treat these states differently:
+
+- `COBALT_NOT_RUNNING`: The launcher is unavailable.
+- `COBALT_NOT_SIGNED_IN`: The launcher is connected without a player session.
+- `COBALT_OFFLINE`: The launcher is connected but cannot reach a required service.
+- `COBALT_NOT_GRANTED`: The game or player has not granted the capability.
+
+Do not block gameplay while waiting for a reconnection.
