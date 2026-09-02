@@ -1,0 +1,98 @@
+---
+title: "Squad Dynamics"
+description: "Form opt-in squads from private duo relationship scores and compatible play preferences."
+---
+
+Squad Dynamics helps players assemble a temporary group before a game handles its own lobby or matchmaking. Cobalt evaluates how well each duo tends to play together, then proposes a squad whose members all have a reasonable social connection.
+
+<Warning>
+  Squad Dynamics is a proposed social capability. Relationship scores remain private to Cobalt and must not be exposed to games, developers, advertisers, or other players.
+</Warning>
+
+## What a relationship score means
+
+A relationship score is a decaying, contextual estimate of whether two players are likely to accept and enjoy another session together. It can use opted-in co-play across supported Cobalt games, so Cobalt can find a compatible fourth player who does not own the current game. It is not a friendship rank, reputation score, skill rating, or measure of a person's value.
+
+Cobalt can use bounded signals such as:
+
+- Mutually accepted invitations
+- Repeat party sessions and completed co-op sessions
+- Recent play frequency and session duration bands
+- Voluntary **Play again** feedback
+- Mutual friend or follow state
+- Repeated invitation declines, with a short decay window
+
+Cobalt must not use message contents, voice recordings, precise location, private purchase history, protected traits, or activity from a player who opted out. A block or safety restriction is a hard exclusion, not a negative score.
+
+## Score the whole squad
+
+A four-player squad contains six duo relationships. Choosing only the highest average can hide one weak or uncomfortable pairing, so Cobalt includes a weak-link term:
+
+```text
+squad_cohesion = 0.65 × average(duo_scores) + 0.35 × minimum(duo_scores)
+```
+
+For example, internal duo scores of `86`, `82`, `79`, `77`, `74`, and `71` produce an average of `78.2`. The minimum of `71` lowers the squad cohesion to `75.7`, so a strong trio cannot completely hide a weak fourth-player connection.
+
+Before scoring, Cobalt filters candidates by hard requirements such as game mode, platform, input pool, region, language preference, age policy, cross-play choice, blocks, and current availability.
+
+The exact weights remain service-owned and versioned. Developers choose a goal such as **Established friends**, **Friends of friends**, or **Balanced discovery** instead of tuning individual behavioral signals.
+
+## Enable Squad Dynamics
+
+In the Cobalt Developer Portal, open **Social and play** > **Squad Dynamics**, then configure:
+
+- Supported squad sizes and game modes
+- Required platform, build, region, and input compatibility
+- Whether Cobalt may introduce one friend-of-friend
+- Minimum established duo connections for a proposal
+- Proposal timeout and re-proposal cooldown
+- Whether an eligible four-player squad can enter a **Squad gift** campaign
+
+Sandbox projects can generate labeled test proposals. Production proposals and gift campaigns require a verified `c_` game.
+
+## Request a proposal
+
+Request a proposal when the player chooses **Find a squad**. Do not call it in the background or infer consent from launching the game.
+
+```cpp
+CobaltSquadRequest request{};
+request.struct_size = sizeof(CobaltSquadRequest);
+request.mode_id = "four_player_coop";
+request.target_size = 4;
+request.discovery = COBALT_SQUAD_FRIENDS_OF_FRIENDS;
+
+Cobalt_RequestSquadProposal(&request, OnSquadProposal, nullptr);
+```
+
+Cobalt returns an opaque proposal ID and the public profiles needed for the confirmation UI. It does not return duo scores, signal history, household membership, or the reason a particular candidate was excluded.
+
+Every proposed member must accept before Cobalt creates a party. After acceptance, use the normal short-lived join-payload flow from [Parties and invitations](/features/parties). The game or its backend still owns gameplay matchmaking, server allocation, teams, and skill balance.
+
+## Complete a three-of-four group
+
+For a four-player mode, Cobalt can consider a non-owner when that player has strong eligible ties to the three owners and opted in to game discovery. If the official game has an active Cobalt-funded campaign, the proposal can include a complimentary copy offer.
+
+The offer appears only after Cobalt confirms:
+
+- Exactly three squad members have permanent production ownership
+- The fourth member does not own the eligible base game
+- The candidate meets the campaign's relationship, account, region, and platform rules
+- All six duo relationships pass safety filters
+- The campaign has remaining budget and the recipient passes anti-abuse checks
+
+The fourth member sees **Free gift copy, on us** and chooses whether to accept. Declining the copy does not lower any relationship score. The developer and other squad members learn only whether the player can join, not why an offer was accepted, declined, or unavailable.
+
+See [Game and family sharing](/distribution/sharing#offer-the-fourth-squad-member-a-copy) for entitlement and campaign behavior.
+
+## Give players control
+
+- Make squad discovery opt-in for each request.
+- Let players choose friend-only or friend-of-friend discovery.
+- Show the proposed members before sending invitations.
+- Let any member decline without revealing who declined.
+- Provide **Don't suggest this player** separately from account blocking.
+- Let players disable relationship-based suggestions and clear optional feedback history.
+- Use minimum cohort sizes and aggregated metrics in developer analytics.
+
+Relationship scores should improve introductions, not gate ordinary parties, punish declines, set prices, target ads, or decide access to unrelated Cobalt features.

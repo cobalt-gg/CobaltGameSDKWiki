@@ -33,6 +33,7 @@ The C API is the stable ABI beneath C++, Unity, Unreal Engine, and future langua
 | Function | Purpose |
 | --- | --- |
 | `Cobalt_GetGameEntitlement` | Read the current account's ownership state for this game |
+| `Cobalt_GetAccessGrant` | Read whether current access is owned, gifted, or borrowed |
 | `Cobalt_SetEntitlementChangedCallback` | Observe ownership, account, and offline-license changes |
 | `Cobalt_RequestOwnershipProof` | Request a short-lived proof for a game backend |
 
@@ -65,6 +66,18 @@ The C API is the stable ABI beneath C++, Unity, Unreal Engine, and future langua
 | `Cobalt_CloudEndWrite` | Resume snapshots after the write |
 | `Cobalt_CloudCheckpoint` | Request sync of a declared save set |
 
+## Configuration and releases
+
+| Function | Purpose |
+| --- | --- |
+| `Cobalt_GetReleaseContext` | Read the current build, channel, and config revision |
+| `Cobalt_GetConfigSnapshot` | Read one consistent, signed remote-config snapshot |
+| `Cobalt_ConfigGetBool` | Read a registered boolean with a compiled fallback |
+| `Cobalt_ConfigGetInt64` | Read a registered bounded integer with a compiled fallback |
+| `Cobalt_ConfigGetDouble` | Read a registered bounded double with a compiled fallback |
+| `Cobalt_ConfigGetString` | Read a registered enum or short string with a compiled fallback |
+| `Cobalt_SetConfigChangedCallback` | Observe a compatible snapshot change at a safe boundary |
+
 ## Social and media
 
 | Function | Purpose |
@@ -72,6 +85,9 @@ The C API is the stable ABI beneath C++, Unity, Unreal Engine, and future langua
 | `Cobalt_SetParty` | Publish party capacity and joinability |
 | `Cobalt_SetJoinPayloadCallback` | Create a short-lived join payload |
 | `Cobalt_SetInvitationAcceptedCallback` | Observe accepted invitations |
+| `Cobalt_RequestSquadProposal` | Request an opt-in, player-approved squad proposal |
+| `Cobalt_GetSharedPlaySession` | Read remote participants and controller assignments |
+| `Cobalt_SetHandoffState` | Publish a safe checkpoint that can resume on another device |
 | `Cobalt_SetMediaContext` | Attach match and level context to captures |
 | `Cobalt_AddMediaMarker` | Mark a noteworthy event |
 | `Cobalt_RequestScreenshot` | Request a player-permitted screenshot |

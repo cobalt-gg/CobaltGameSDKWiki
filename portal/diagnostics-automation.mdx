@@ -1,0 +1,97 @@
+---
+title: "Diagnostics and automation"
+description: "Inspect SDK sessions, validate feature definitions, automate release events, and audit access."
+---
+
+The Developer Portal provides operational tools for testing an integration without exposing player credentials or raw private activity. Diagnostics use bounded, redacted events tied to a project and environment.
+
+## Inspect a live SDK session
+
+When a developer enables diagnostics in Cobalt and launches a registered test build, the portal can show:
+
+- Game, build, channel, SDK, launcher, and protocol versions
+- Connection and sign-in state
+- Requested, granted, denied, and unsupported capabilities
+- Current lifecycle, presence, party, access-grant, and config revision summaries
+- Callback queue depth, rate-limit warnings, and recent result codes
+- Cloud-save checkpoint state without file contents
+- Launch and handoff action types without opaque payloads
+
+The player or developer must approve each diagnostic session. Production players cannot be inspected remotely by default.
+
+## Replay a test scenario
+
+The scenario runner can simulate launcher and service transitions against a development build:
+
+<AccordionGroup>
+  <Accordion title="Connection changes">
+    Disconnect the launcher, switch accounts, go offline, restore the network, expire a ticket, or negotiate an older protocol.
+  </Accordion>
+  <Accordion title="Ownership changes">
+    Grant or expire a test pass, change household concurrency, revoke a test entitlement, or accept a sandbox squad gift.
+  </Accordion>
+  <Accordion title="Save failures">
+    Interrupt an upload, exceed quota, produce two changed copies, or test an incompatible migration fixture.
+  </Accordion>
+  <Accordion title="Social flows">
+    Accept or decline an invitation, expire a join payload, reject a squad proposal, disconnect a remote guest, or fail a handoff target.
+  </Accordion>
+</AccordionGroup>
+
+Scenarios enqueue documented SDK states and callbacks. They do not inject arbitrary memory, filesystem paths, commands, or network traffic into the game.
+
+## Validate definitions
+
+Before a portal revision becomes **Ready**, validators check:
+
+- Duplicate or unstable achievement, statistic, action, product, and config IDs
+- Missing localization and inaccessible images
+- Invalid save roots, traversal patterns, file limits, and migration gaps
+- Presence text length and update-rate budgets
+- Sharing, DRM, and offline-policy conflicts
+- Release channels whose SDK version cannot support an enabled capability
+- Webhook endpoints, signatures, retry behavior, and event-version handling
+
+Warnings can remain visible with an approval note. Security failures and missing production prerequisites block publication.
+
+## Use webhooks
+
+Project webhooks notify your backend about operational changes such as:
+
+- `release.published`, `release.held`, and `release.rolled_back`
+- `config.published` and `feature.paused`
+- `playtest.started` and `playtest.ended`
+- `sharing.policy_changed` and `key_batch.disabled`
+- `project.role_changed` and `service_account.rotated`
+
+Cobalt signs the raw request body with a rotating project webhook secret. Verify the signature and timestamp before parsing the event. Store the event ID for idempotency, accept events out of order, and retrieve current state before taking an irreversible action.
+
+Webhooks should omit account tokens, redeemed keys, relationship scores, save contents, message contents, and remote-play media. Player-level entitlement or progression events require a separately reviewed server integration and minimum necessary scopes.
+
+## Create service accounts
+
+Create a service account for one automation purpose, such as uploading builds or reading release health. Choose narrow scopes and restrict production access by environment.
+
+```text
+releases:write
+releases:read
+config:publish
+diagnostics:read_aggregate
+webhooks:manage
+```
+
+Show a client secret only once. Store it in your deployment secret manager, rotate it without downtime, and never include it in a game binary, `.clgame` package, source repository, crash report, or launcher command line.
+
+## Build release gates
+
+Automation can report a gate as passed, failed, or unavailable. A release policy can require signed-build verification, malware scanning, save-migration fixtures, crash thresholds, SDK compatibility, accessibility review, and human approval.
+
+An unavailable external gate should hold promotion and notify the release manager. It must not silently approve a production release or revoke a previously published build.
+
+## Audit and retain
+
+The audit history records authentication, role changes, verification evidence, service-account changes, product and key operations, config publication, feature pauses, and release promotion. Exported records should use stable event schemas and organization-defined retention within Cobalt's allowed range.
+
+Diagnostic payloads and audit records have different purposes. Keep diagnostic retention short, redact player identifiers where possible, and never let deleting a diagnostic trace erase the security audit of who changed production.
+
+Return to the [Developer Portal overview](/portal/overview) to review activation and approval rules.

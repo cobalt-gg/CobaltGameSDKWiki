@@ -1,0 +1,97 @@
+---
+title: "Developer Portal overview"
+description: "Register a game, activate SDK capabilities, and control production changes from one project workspace."
+---
+
+The Cobalt Developer Portal is the control plane for your game integration. You register capabilities, define player-facing content, test changes in a sandbox, and publish signed configuration to the Cobalt Launcher.
+
+<Warning>
+  The Developer Portal is planned. Names, roles, approval rules, and configuration contracts on these pages may change before release.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Playtests and releases" icon="flask" href="/portal/playtests-releases">
+    Create access cohorts, promote builds, and stage rollouts by release channel.
+  </Card>
+  <Card title="Live Ops and remote config" icon="sliders" href="/portal/live-ops">
+    Publish typed settings, schedule events, run experiments, and pause unsafe features.
+  </Card>
+  <Card title="Diagnostics and automation" icon="wrench" href="/portal/diagnostics-automation">
+    Inspect SDK sessions, validate schemas, sign webhooks, and manage service accounts.
+  </Card>
+  <Card title="Project trust" icon="badge-check" href="/concepts/project-trust">
+    Verify an official game and understand which production features require review.
+  </Card>
+</CardGroup>
+
+## Activate a capability
+
+Every optional capability follows the same publication flow.
+
+<Steps>
+  <Step title="Choose the capability">
+    Open **Features** and select a capability such as **Cloud saves**, **Squad Dynamics**, or **Shared Remote Play**.
+  </Step>
+  <Step title="Complete prerequisites">
+    Add required definitions, privacy text, save sets, launch actions, or ownership products. The portal blocks publication when a required dependency is missing.
+  </Step>
+  <Step title="Select environments">
+    Enable the capability for sandbox, internal, playtest, or production channels. A sandbox change cannot grant production ownership or distribution rights.
+  </Step>
+  <Step title="Test a revision">
+    Publish an immutable test revision. Use test accounts and the SDK session inspector to verify capability negotiation and failure behavior.
+  </Step>
+  <Step title="Approve and publish">
+    An authorized project member reviews the diff and player impact. Sensitive changes require multi-factor authentication and a second approver.
+  </Step>
+</Steps>
+
+Publishing creates a signed capability revision. A running game receives only the capabilities allowed by its game ID, build, release channel, player settings, and current portal revision.
+
+## Feature catalog
+
+| Area | Portal controls |
+| --- | --- |
+| Player and activity | Profile fields, lifecycle states, presence templates, and update limits |
+| Progression | Achievement definitions, statistic schemas, seasons, and reset rules |
+| Storage | Save sets, quotas, conflict policy, retention, and migration tests |
+| Social and play | Parties, invitations, Squad Dynamics, Shared Remote Play, and handoff |
+| Ownership | Products, keys, sharing programs, squad gifts, and optional DRM |
+| Distribution | Builds, channels, dependencies, install rules, staged rollout, and rollback |
+| Live Ops | Typed config, feature flags, experiments, scheduled events, and community goals |
+| Operations | Diagnostics, audit history, service accounts, webhooks, and incident pauses |
+
+Features begin in **Draft**. A validated test revision can move to **Ready**, an approved production revision moves to **Live**, and an authorized operator can move a capability to **Paused** without deleting its configuration.
+
+## Separate configuration from code
+
+Portal activation cannot make an old SDK support a new protocol. The portal shows the minimum SDK and launcher versions for each capability and warns when an active release channel cannot negotiate them.
+
+Your game must still check availability:
+
+```cpp
+if (Cobalt_HasCapability(COBALT_CAPABILITY_SQUAD_PROPOSALS)) {
+    ShowFindSquadAction();
+}
+```
+
+Keep a normal gameplay fallback when a portal feature is paused, unavailable offline, denied by the player, or unsupported by the current launcher.
+
+## Roles and approvals
+
+| Role | Typical access |
+| --- | --- |
+| Viewer | Read configuration, release status, and aggregated diagnostics |
+| SDK integrator | Edit sandbox capabilities and run test sessions |
+| Live Ops operator | Publish approved config, events, and incident pauses |
+| Release manager | Promote builds and manage staged rollouts |
+| Distribution manager | Manage products, keys, sharing, DRM, and release access |
+| Project owner | Manage organizations, roles, verification, and high-risk approvals |
+
+Use the narrowest role that fits a person's work. Production keys, required DRM, ownership revocation, organization transfer, and service-account creation should require a second approver.
+
+## Review every production change
+
+The portal shows a semantic diff before publication: affected channels, capabilities, player cohorts, SDK minimums, access changes, and rollback behavior. Each production action records the actor, approver, timestamp, revision, and reason in an append-only audit history.
+
+An emergency pause should disable only the affected feature. It must not silently revoke purchases, erase progression, delete cloud saves, or make a game unplayable when the SDK integration is optional.

@@ -3,7 +3,7 @@ title: "Cobalt Game SDK"
 description: "Connect your game to Cobalt player services, social features, media, and distribution."
 ---
 
-The Cobalt Game SDK connects your game to the Cobalt Launcher. You can identify the signed-in player, publish rich presence, record achievements and statistics, synchronize saves, accept launch and invite context, enrich captures, grant account-linked ownership, optionally validate licenses, and participate in Cobalt-managed distribution.
+The Cobalt Game SDK connects your game to the Cobalt Launcher. You can identify the signed-in player, publish rich presence, record achievements and statistics, synchronize saves, accept launch and invite context, form opt-in squads, support shared play and device handoff, grant account-linked ownership, configure sharing, optionally validate licenses, and participate in Cobalt-managed distribution.
 
 <Warning>
   This is an example wiki for an SDK that is still being designed. Names, packages, capabilities, and signatures shown here are a proposed contract, not a released API.
@@ -32,6 +32,9 @@ If Cobalt is unavailable, SDK calls return stable result codes and your game con
   <Card title="Grant game ownership" icon="key" href="/distribution/game-keys">
     Link a redeemed game key to a player's Cobalt account.
   </Card>
+  <Card title="Configure the Developer Portal" icon="sliders" href="/portal/overview">
+    Activate capabilities, manage releases, publish Live Ops config, and inspect test sessions.
+  </Card>
 </CardGroup>
 
 ## Planned capability groups
@@ -43,11 +46,13 @@ If Cobalt is unavailable, SDK calls return stable result codes and your game con
 | Activity | Accurate sessions, playtime, presence, and pause state |
 | Progression | Achievements, counters, statistics, and personal bests |
 | Storage | Declared cloud-save sets, checkpoints, and conflict handling |
-| Social | Parties, invitations, and join context with player consent |
+| Social | Parties, invitations, private squad proposals, and join context with player consent |
 | Media | Capture context, screenshots, clips, and metadata |
-| Launch | Safe launch arguments, build channels, and deep-link payloads |
-| Ownership | Account-linked game keys and optional entitlement validation |
+| Connected play | Shared Remote Play, controller seats, and safe device handoff |
+| Launch | Safe launch actions, build channels, and deep-link payloads |
+| Ownership | Account-linked game keys, sharing policies, squad gifts, and optional entitlement validation |
 | Distribution | Official installs, updates, and independent `.clgame` packages |
+| Live Ops | Typed remote config, scheduled events, experiments, and incident pauses |
 
 ## Choose an integration
 

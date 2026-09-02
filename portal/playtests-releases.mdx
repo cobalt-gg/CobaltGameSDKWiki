@@ -1,0 +1,100 @@
+---
+title: "Playtests and releases"
+description: "Create test cohorts, grant branch access, promote builds, and stage production rollouts."
+---
+
+The Developer Portal connects playtest access to signed builds and release channels. You can invite a bounded cohort without issuing production ownership or exposing a reusable download URL.
+
+<Warning>
+  Playtest access and Cobalt-hosted release management require service and distribution support that is not yet finalized.
+</Warning>
+
+## Create a playtest
+
+<Steps>
+  <Step title="Choose a build">
+    Select a signed build from **Releases** or register an external installation flow. Lock the playtest to a build family and compatible save-data version.
+  </Step>
+  <Step title="Define the cohort">
+    Add named testers, organization members, one-time invite links, imported keys, or a bounded random application pool.
+  </Step>
+  <Step title="Set the window">
+    Choose enrollment and play dates, regions, platforms, capacity, and whether new participants can join after the test begins.
+  </Step>
+  <Step title="Configure test features">
+    Enable sandbox achievements, isolated statistics, test cloud saves, diagnostics, feedback prompts, and any experimental capabilities.
+  </Step>
+  <Step title="Publish access">
+    Cobalt grants a revocable playtest entitlement. It remains visibly separate from ownership of the released game.
+  </Step>
+</Steps>
+
+An invite link opens a review screen before enrollment. It must not silently install a build, bypass age or region rules, or reveal the participant list.
+
+## Use release channels
+
+| Channel | Intended audience | Default access |
+| --- | --- | --- |
+| Development | Individual SDK developers | Project members and local test accounts |
+| Internal | Studio-wide verification | Organization members and named testers |
+| Playtest | External testing groups | Explicit playtest entitlement |
+| Preview | Release candidates and press | Named cohorts or campaign keys |
+| Stable | Production players | Valid ownership or allowed sharing grant |
+
+Each channel pins a build, capability revision, config revision, product rules, and save compatibility range. Promoting a build copies references into the target channel; it does not mutate the source channel.
+
+## Stage a rollout
+
+For a stable release, you can start with a deterministic percentage of eligible accounts and expand it after reviewing health signals.
+
+```text
+5% canary → 20% → 50% → 100%
+```
+
+Cobalt keeps a player in the same rollout bucket across launches. Developers can target supported platform, architecture, region, and previous build family. Do not target protected traits, private social graphs, or individual players through production rollout rules.
+
+Rollout gates can watch bounded signals such as:
+
+- Install, update, repair, and launch success rates
+- Crash-free session percentage
+- SDK initialization and capability-negotiation failures
+- Save migration and cloud-conflict rates
+- Match join failures reported through a server-authoritative integration
+
+An automatic hold stops expansion. It should not roll back or terminate a healthy running session without operator review.
+
+## Validate save compatibility
+
+Before promotion, declare whether the new build can read, upgrade, and downgrade each save-data version. The portal can run fixture-based migration checks against developer-supplied sample saves.
+
+If rollback would make a migrated save unreadable, mark the build as forward-only. Cobalt can pause rollout and preserve the last compatible installation, but the game remains responsible for safe migration code and backups.
+
+## Read release context
+
+The SDK can expose non-secret release information for diagnostics and feature selection:
+
+```cpp
+CobaltReleaseContext release{};
+release.struct_size = sizeof(CobaltReleaseContext);
+
+if (Cobalt_GetReleaseContext(&release) == COBALT_OK) {
+    Log("channel=%s build=%s config=%llu",
+        release.channel_id,
+        release.build_id,
+        release.config_revision);
+}
+```
+
+Do not use a client-reported channel as proof of playtest eligibility on your backend. Validate a short-lived, audience-bound access proof when a private online service requires it.
+
+## Promote or roll back
+
+Promotion requires passing the channel's release checklist and approval policy. A rollback changes which build new launches receive. It does not:
+
+- Revoke permanent game ownership
+- Delete achievements or statistics
+- Replace cloud saves without a compatibility decision
+- Remove access from a still-valid playtest unless an operator ends it
+- Force-close an active game session
+
+Use [Diagnostics and automation](/portal/diagnostics-automation) to define release gates and notify your deployment systems.

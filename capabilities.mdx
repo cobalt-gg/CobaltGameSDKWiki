@@ -62,12 +62,18 @@ Your game keeps ownership of its save format. Cobalt handles transport, version 
   <Card title="Parties and invitations" icon="users" href="/features/parties">
     Publish party capacity, receive invites, and accept safe join context.
   </Card>
+  <Card title="Squad Dynamics" icon="people-group" href="/features/squad-dynamics">
+    Form opt-in groups from private duo affinity and compatible play preferences.
+  </Card>
+  <Card title="Shared Remote Play and handoff" icon="gamepad-modern" href="/features/remote-play-handoff">
+    Invite remote couch co-op guests or continue a safe checkpoint on another device.
+  </Card>
   <Card title="Launch context" icon="route" href="/features/launch-context">
     Read Cobalt-supplied mode, lobby, server, and campaign parameters.
   </Card>
 </CardGroup>
 
-Join secrets remain opaque to Cobalt UI and are delivered only after the player accepts an invitation.
+Join secrets remain opaque to Cobalt UI and are delivered only after the player accepts an invitation. Duo relationship scores remain private to Cobalt and never enter the game process.
 
 ## Media integration
 
@@ -83,12 +89,34 @@ A game can request a capture after a user action, but Cobalt's media permissions
   <Card title="Game ownership keys" icon="key" href="/distribution/game-keys">
     Link a verified game license to a player's Cobalt account without requiring Cobalt-hosted downloads.
   </Card>
+  <Card title="Game and family sharing" icon="people-roof" href="/distribution/sharing">
+    Offer bounded friend passes, household access, and eligible complimentary squad copies.
+  </Card>
   <Card title="Optional Cobalt DRM" icon="shield-check" href="/features/optional-drm">
     Check account ownership online or through a bounded signed offline license.
   </Card>
 </CardGroup>
 
 Production ownership and DRM require a verified `c_` project. Public `s_` projects receive isolated test entitlements only.
+
+## Developer Portal controls
+
+<CardGroup cols={2}>
+  <Card title="Capability activation" icon="toggle-on" href="/portal/overview">
+    Configure prerequisites, environments, approvals, and signed capability revisions.
+  </Card>
+  <Card title="Playtests and releases" icon="flask" href="/portal/playtests-releases">
+    Grant test access, promote builds, validate saves, and stage production rollouts.
+  </Card>
+  <Card title="Live Ops" icon="sliders" href="/portal/live-ops">
+    Publish typed remote config, schedule events, run experiments, and pause optional features.
+  </Card>
+  <Card title="Diagnostics and automation" icon="wrench" href="/portal/diagnostics-automation">
+    Inspect test sessions, simulate failures, enforce release gates, and receive signed webhooks.
+  </Card>
+</CardGroup>
+
+Portal changes cannot bypass SDK capability negotiation or player privacy settings. Keep an in-game fallback for every optional feature.
 
 ## Game installation
 

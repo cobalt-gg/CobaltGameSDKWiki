@@ -48,7 +48,18 @@
         "pages": [
           "features/launch-context",
           "features/parties",
+          "features/squad-dynamics",
+          "features/remote-play-handoff",
           "features/media"
+        ]
+      },
+      {
+        "group": "Developer Portal",
+        "pages": [
+          "portal/overview",
+          "portal/playtests-releases",
+          "portal/live-ops",
+          "portal/diagnostics-automation"
         ]
       },
       {
@@ -62,6 +73,7 @@
         "group": "Ownership and distribution",
         "pages": [
           "distribution/game-keys",
+          "distribution/sharing",
           "features/optional-drm",
           "distribution/clgame",
           "distribution/install-links"

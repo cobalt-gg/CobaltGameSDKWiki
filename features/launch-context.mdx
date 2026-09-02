@@ -26,6 +26,8 @@ A context can include:
 - A release channel or expected build ID
 - A short expiration time
 
+Device handoff uses the same bounded mechanism with a registered action such as `resume_handoff`. The payload identifies a Cobalt-managed checkpoint ticket, not a filesystem path or raw save data.
+
 ## Register actions
 
 Declare supported actions in the developer configuration. Cobalt rejects unknown actions before launching the game.

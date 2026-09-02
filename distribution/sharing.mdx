@@ -1,0 +1,129 @@
+---
+title: "Game and family sharing"
+description: "Configure friend passes, household access, and complimentary squad copies in the Cobalt Developer Portal."
+---
+
+Sharing lets an official game extend access without treating every shared session as a permanent purchase. You choose the allowed programs in the Cobalt Developer Portal. Cobalt applies account, device, concurrency, and campaign rules before it grants access.
+
+<Warning>
+  Sharing policies and access APIs are proposed. Portal labels, eligibility rules, and campaign funding may change before release.
+</Warning>
+
+## Choose an access program
+
+| Program | What the recipient gets | Typical duration | Can install the game? |
+| --- | --- | --- | --- |
+| Game sharing | A revocable guest pass from an eligible owner | Developer-defined, within Cobalt limits | Yes, while the pass is active |
+| Family sharing | A borrowed license inside a verified household | While the household and concurrency rules remain valid | Yes |
+| Shared Remote Play | A seat in the owner's streamed session | One live session | No |
+| Squad gift | A Cobalt-funded permanent copy from an eligible campaign | Permanent after acceptance | Yes |
+
+Direct ownership always takes precedence over borrowed access. Shared Remote Play does not create an entitlement and never unlocks local game files for a guest.
+
+## Enable sharing in the Developer Portal
+
+<Steps>
+  <Step title="Open sharing settings">
+    Select your official `c_` game, then open **Ownership and distribution** > **Sharing**.
+  </Step>
+  <Step title="Choose programs">
+    Enable **Game sharing**, **Family sharing**, **Shared Remote Play**, or an available **Squad gift** campaign. Each program remains off until an authorized project member enables it.
+  </Step>
+  <Step title="Set release policies">
+    Choose eligible editions and release channels. Set guest-pass duration, household concurrency, offline behavior, and downloadable-content handling where those controls apply.
+  </Step>
+  <Step title="Test in sandbox">
+    Use test accounts and test entitlements. Sandbox access never consumes a production campaign budget or creates a production gift.
+  </Step>
+  <Step title="Publish the policy">
+    Review player-facing terms and publish. Cobalt records the change in the project audit log.
+  </Step>
+</Steps>
+
+Only verified `c_` games can publish production sharing policies. Require the **Distribution manager** role and multi-factor authentication for policy changes.
+
+## Game sharing
+
+Game sharing lets an owner issue a bounded friend pass from the Cobalt client. The developer can control:
+
+- Which editions and release channels are eligible
+- How many passes an owner can issue in a rolling period
+- How long a pass remains active
+- Whether the owner and guest can play at the same time
+- Whether downloadable content follows the base game
+- Whether a short offline grace period is allowed
+
+Cobalt shows both players when a pass expires or becomes unavailable. Revoking a pass should take effect at the next safe boundary, not in the middle of a match or save operation.
+
+## Family sharing
+
+Family sharing creates a household pool without exposing one member's account credentials to another member. Cobalt verifies household membership and enforces the developer's concurrency policy.
+
+Do not expose the lending account's private profile or purchase history through the SDK. A game only needs the current player's public identity, access kind, eligible product, and lease expiration.
+
+Family access should remain available offline only for the signed license period. If another household member starts the same title and exceeds the allowed concurrency, Cobalt gives the current player time to save and reconnect instead of terminating the process.
+
+## Read the current access grant
+
+Use the access grant when your UI needs to explain why the current player can launch. Do not use it as a server-authoritative ownership proof.
+
+```cpp
+CobaltAccessGrant grant{};
+grant.struct_size = sizeof(CobaltAccessGrant);
+
+if (Cobalt_GetAccessGrant(&grant) == COBALT_OK) {
+    switch (grant.kind) {
+        case COBALT_ACCESS_OWNED:
+        case COBALT_ACCESS_SQUAD_GIFT:
+            ShowPermanentAccess();
+            break;
+        case COBALT_ACCESS_GAME_SHARE:
+        case COBALT_ACCESS_FAMILY_SHARE:
+            ShowBorrowedAccess(grant.expires_at_unix_seconds);
+            break;
+        default:
+            break;
+    }
+}
+```
+
+The grant never includes a purchase receipt, redeemed key, household roster, relationship score, or another player's account token.
+
+## Offer the fourth squad member a copy
+
+An eligible **Squad gift** campaign can complete a four-person squad when three members own the game and the fourth does not.
+
+<Steps>
+  <Step title="Form an eligible squad">
+    [Squad Dynamics](/features/squad-dynamics) proposes four players who opted in and have compatible safety, region, platform, and play-mode settings.
+  </Step>
+  <Step title="Confirm three owners">
+    Cobalt checks for three permanent production entitlements. Borrowed passes and Shared Remote Play seats do not count toward the three-owner threshold.
+  </Step>
+  <Step title="Check the campaign">
+    Cobalt verifies the official game, eligible edition, campaign dates, remaining budget, recipient eligibility, and anti-abuse limits.
+  </Step>
+  <Step title="Present the offer">
+    The fourth player sees **Free gift copy, on us** with the game, edition, publisher, sponsor, and terms. The other squad members see only that an offer is available.
+  </Step>
+  <Step title="Accept the gift">
+    The recipient explicitly accepts. Cobalt creates a permanent production entitlement and records the campaign attribution. Declining does not affect the squad or relationship model.
+  </Step>
+</Steps>
+
+The copy is funded by Cobalt under the campaign terms. It is not deducted from another player's library, and squad members cannot choose, sell, or transfer the recipient's entitlement.
+
+<Info>
+  A developer opts an eligible product into a campaign, but Cobalt owns final funding, eligibility, rate limits, and fraud review. Enabling **Squad gift** does not guarantee that every three-owner squad receives an offer.
+</Info>
+
+## Protect players and licenses
+
+- Require recipient acceptance before creating a permanent entitlement.
+- Exclude blocked or muted relationships from shared offers and squad formation.
+- Never reveal a household graph, duo score, or fraud decision to the game client.
+- Rate-limit passes and gifts by account, device, household, game, and campaign.
+- Keep refund, chargeback, and revocation actions separate from ordinary sharing expiration.
+- Explain when access is borrowed, when it expires, and which features require direct ownership.
+
+Continue with [Shared Remote Play and handoff](/features/remote-play-handoff) for streamed guest sessions and device transfers.

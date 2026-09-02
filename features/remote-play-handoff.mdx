@@ -1,0 +1,101 @@
+---
+title: "Shared Remote Play and handoff"
+description: "Let invited guests join a streamed session and let players resume safely on another device."
+---
+
+Shared Remote Play lets an owner stream a local multiplayer session to invited guests. Handoff moves a resumable session to another compatible device. Both features use player-approved, short-lived session tickets instead of sharing account credentials.
+
+<Warning>
+  Shared Remote Play and handoff are later planned capabilities. Transport limits, platform support, and example API names may change.
+</Warning>
+
+## Enable connected play
+
+In the Cobalt Developer Portal, open **Social and play** > **Connected play** for your official game. Enable each feature per release channel.
+
+| Setting | What you choose |
+| --- | --- |
+| **Shared Remote Play** | Maximum guests, local co-op modes, controller slots, and whether keyboard input is supported |
+| **Guest voice** | Whether Cobalt party voice is available during a shared session |
+| **Device handoff** | Eligible platforms, save sets, launch actions, and maximum resume window |
+| **Spectator handoff** | Whether a spectator can accept an open controller slot after player approval |
+
+The portal validates that handoff references a declared cloud-save set and registered launch action. A game that cannot checkpoint safely should leave device handoff disabled.
+
+## Shared Remote Play
+
+The host owns or otherwise has a valid local access grant and runs the game. Cobalt streams video, audio, and approved input. A guest receives a temporary session seat, not a game entitlement.
+
+<Steps>
+  <Step title="Advertise shared play">
+    Publish a party with an available shared-play seat. Cobalt shows the option only to players allowed by the host's privacy settings and the game's portal policy.
+  </Step>
+  <Step title="Invite guests">
+    The host selects friends or an accepted Squad Dynamics proposal. Every guest reviews the game, host, input permissions, and session scope.
+  </Step>
+  <Step title="Assign input">
+    Cobalt maps each accepted guest to a virtual controller or an allowed input profile. The game receives normal platform input plus optional participant metadata from the SDK.
+  </Step>
+  <Step title="End cleanly">
+    The host can remove a guest or stop streaming at any time. Cobalt clears virtual input immediately and discards the session ticket.
+  </Step>
+</Steps>
+
+```cpp
+CobaltSharedPlaySession session{};
+session.struct_size = sizeof(CobaltSharedPlaySession);
+
+if (Cobalt_GetSharedPlaySession(&session) == COBALT_OK) {
+    for (uint32_t i = 0; i < session.participant_count; ++i) {
+        BindParticipantBadge(
+            session.participants[i].public_player_id,
+            session.participants[i].controller_slot);
+    }
+}
+```
+
+Treat controller assignments as session state. Do not use them as authentication for an online game account. If a guest needs a persistent game profile, provide an explicit account-linking or guest-profile flow.
+
+## Hand off to another device
+
+Handoff works at a safe checkpoint, such as a menu, hub, or turn boundary. The source game prepares state; Cobalt synchronizes declared saves and sends a one-time launch action to the target.
+
+```cpp
+CobaltHandoffState handoff{};
+handoff.struct_size = sizeof(CobaltHandoffState);
+handoff.resume_action = "resume_handoff";
+handoff.save_set = "campaign";
+handoff.checkpoint_id = GetCommittedCheckpointId();
+handoff.safe_to_transfer = IsAtSafeCheckpoint();
+
+Cobalt_SetHandoffState(&handoff);
+```
+
+When the player chooses **Continue on another device**, use this sequence:
+
+1. Cobalt asks the source game to prepare the declared checkpoint.
+2. The game finishes its save and confirms that the checkpoint is committed.
+3. Cobalt uploads the save set and creates a short-lived, device-bound handoff ticket.
+4. The target verifies its build, access grant, and save version before launch.
+5. The target receives `resume_handoff` through [launch context](/features/launch-context).
+6. The target consumes the action after loading successfully. The source session then closes or returns to its title screen.
+
+If the transfer fails, keep the source session recoverable and preserve the last committed save. Never delete local state because a target device reported a timeout.
+
+## Hand off a shared session
+
+When a host changes devices during Shared Remote Play, guests remain in a waiting room while Cobalt transfers the host session. Reconnect guests only after the target game confirms the same party, compatible build, and controller capacity.
+
+Do not silently promote a guest to host. Host transfer requires explicit approval from the current host, and the new host must have an access grant allowed by the developer's sharing policy.
+
+## Security and privacy
+
+- Encrypt streamed media and input in transit.
+- Bind every guest ticket to the host, game, party, device, controller slot, and expiration time.
+- Give the host a persistent indicator while input or media is shared.
+- Suppress system overlays, passwords, payment screens, and other protected surfaces from capture.
+- Stop remote input when the stream loses focus, the host locks the device, or a safety block takes effect.
+- Keep voice content, raw input history, and video frames out of relationship scoring.
+- Apply reduced bandwidth or end the session safely instead of allowing unbounded latency queues.
+
+See [Game and family sharing](/distribution/sharing) for the difference between a streamed seat and a borrowed license.

@@ -1,0 +1,112 @@
+---
+title: "Live Ops and remote config"
+description: "Publish typed configuration, schedule events, run bounded experiments, and pause features safely."
+---
+
+Live Ops lets you change declared gameplay configuration without shipping a new executable. The game provides safe defaults and an allowlist of supported keys. Cobalt signs and distributes immutable configuration snapshots.
+
+<Warning>
+  Remote configuration is not a code-delivery system. Never use it to download scripts, native libraries, executable commands, or arbitrary file paths.
+</Warning>
+
+## Define typed keys
+
+Register each key with a stable ID, type, default, allowed range, and player impact.
+
+```json
+{
+  "configKeys": [
+    {
+      "id": "coop_revive_seconds",
+      "type": "double",
+      "default": 8.0,
+      "minimum": 3.0,
+      "maximum": 15.0
+    },
+    {
+      "id": "weekend_event",
+      "type": "enum",
+      "default": "none",
+      "allowed": ["none", "double_xp", "relic_hunt"]
+    }
+  ]
+}
+```
+
+Supported types should remain small and predictable: boolean, bounded integer, bounded double, enum, short localized text key, and size-limited structured data with a registered schema.
+
+## Read a snapshot
+
+Read one internally consistent snapshot at a safe boundary. Do not fetch individual values every frame.
+
+```cpp
+CobaltConfigSnapshot snapshot{};
+snapshot.struct_size = sizeof(CobaltConfigSnapshot);
+
+if (Cobalt_GetConfigSnapshot(&snapshot) == COBALT_OK) {
+    revive_seconds = Cobalt_ConfigGetDouble(
+        &snapshot,
+        "coop_revive_seconds",
+        8.0);
+}
+```
+
+The launcher caches the last valid signed snapshot for offline use. The game falls back to compiled defaults when no compatible snapshot exists or validation fails.
+
+## Target a configuration
+
+You can target a snapshot by:
+
+- Sandbox or production environment
+- Release channel, build family, platform, or architecture
+- Supported region or language
+- Direct, shared, playtest, or promotional access kind
+- Explicit opt-in cohort or experiment assignment
+- Scheduled event window
+
+Do not target prices or rewards with relationship scores. Do not use protected traits, message contents, household membership, private purchase history, or a hand-selected list of individual production players.
+
+## Schedule events and community goals
+
+A scheduled event combines a config revision, localized presentation, start and end times, eligible modes, and optional server-authoritative progress.
+
+The portal can support:
+
+- Weekend modifiers and rotating modes
+- Community-wide goals with aggregate progress
+- Co-op streaks and squad challenges
+- Time-bounded cosmetic drops
+- Anniversary or launch events
+- A **Play together** event that pairs Squad Dynamics with an eligible sharing campaign
+
+The client can display event metadata from Cobalt, but valuable rewards and competitive progress require validation by the game's backend. Changing a device clock must not start an event early or extend a reward window.
+
+## Run an experiment
+
+Experiments assign eligible, consenting players to a stable pseudonymous cohort. Every experiment declares a hypothesis, owner, start and stop dates, primary metric, guardrails, and minimum supported build.
+
+Use experiments for reversible presentation or balance choices. Do not use them to test weaker privacy, safety, purchase, refund, accessibility, or age protections.
+
+<Info>
+  A player who disables optional product experiments receives the control configuration. Essential reliability comparisons should use aggregated operational metrics instead of behavioral targeting.
+</Info>
+
+## Pause a feature
+
+An incident operator can publish a kill switch for a declared optional capability or config key. The game applies it only at the safe boundary registered for that feature.
+
+Examples include:
+
+- Stop accepting new Shared Remote Play guests while keeping current local play active
+- Stop creating new Squad Dynamics proposals without breaking existing parties
+- Pause a broken event reward while preserving earned progress
+- Disable cloud uploads while keeping local saves writable
+- Hold a build rollout while leaving installed healthy builds launchable
+
+A pause must have an owner, reason, expiration or review time, and recovery plan. Restoring a feature creates a new revision instead of deleting incident history.
+
+## Publish safely
+
+The portal previews affected channels, estimated cohort size, old and new values, client compatibility, schedule, and fallback behavior. High-impact changes support two-person approval, staged exposure, automatic guardrail holds, and one-click rollback to a known revision.
+
+Use [Playtests and releases](/portal/playtests-releases) to verify a config revision with test cohorts before production.
